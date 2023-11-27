@@ -139,6 +139,8 @@ GameObject:
   - component: {fileID: 673166277}
   - component: {fileID: 673166276}
   - component: {fileID: 673166275}
+  - component: {fileID: 673166283}
+  - component: {fileID: 673166282}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -203,15 +205,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 673166273}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02c7d1b323594a144ac9b98fd93e0f7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _layerName: MapCopyrightLayer
   _font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-  _textColor: {r: 0, g: 0, b: 0, a: 0.42}
-  _mapCopyrightAlignment: 1
+  _textColor: {r: 0.16470589, g: 0.16470589, b: 0.16470589, a: 1}
+  _mapCopyrightAlignment: 0
 --- !u!114 &673166278
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -241,7 +243,7 @@ MonoBehaviour:
   _areRoadsEnabled: 0
   _areLabelsEnabled: 1
   _isHillShadingEnabled: 1
-  _imageryStyle: 0
+  _imageryStyle: 2
 --- !u!114 &673166280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,8 +258,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _version: 3
   _mapSession: {fileID: 673166281}
-  _mapEdgeColor: {r: 0.62352943, g: 0.64705884, b: 0.69411767, a: 1}
-  _mapEdgeColorFadeDistance: 0.02
+  _mapEdgeColor: {r: 0.6745098, g: 0.7803922, b: 0.9490197, a: 1}
+  _mapEdgeColorFadeDistance: 0.009
   _detailOffset: 0
   _numElevationTileFallbackLods: 2
   _requestTilesAroundView: 1
@@ -265,8 +267,8 @@ MonoBehaviour:
     _latitude: 47.67
     _longitude: 9.09999999999999
   _zoomLevel: 4.3
-  _minimumZoomLevel: 1
-  _maximumZoomLevel: 20
+  _minimumZoomLevel: 3
+  _maximumZoomLevel: 6
   _mapTerrainType: 0
   _mapShape: 0
   _localMapDimension: {x: 2.54, y: 1}
@@ -274,7 +276,7 @@ MonoBehaviour:
   _localMapBaseHeight: 0.3
   _elevationScale: 1
   _castShadows: 1
-  _receiveShadows: 1
+  _receiveShadows: 0
   _enableMrtkMaterialIntegration: 0
   _terrainMaterial: {fileID: 0}
   _isClippingVolumeWallEnabled: 1
@@ -305,11 +307,119 @@ MonoBehaviour:
   _developerKey: 
   _developerKeySource: 1
   _showMapDataInEditor: 1
-  _languageOverride: 42
+  _languageOverride: 10
   _languageChanged:
     m_PersistentCalls:
       m_Calls: []
   _regionOverride: 
+--- !u!114 &673166282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673166273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f516b169d1e6394fa3bbaed1fcbe214, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 0}
+  _zoomSpeed: 5
+--- !u!114 &673166283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673166273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b303ffbed90191b4dbbf76b03bf83d80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rotationSpeed: 3.5
+  _panSpeed: 0.5
+  _onTapAndHold:
+    m_PersistentCalls:
+      m_Calls: []
+  _onDoubleTap:
+    m_PersistentCalls:
+      m_Calls: []
+  _onInteractionStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  _onInteractionEnded:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!1 &857225162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 857225165}
+  - component: {fileID: 857225164}
+  - component: {fileID: 857225163}
+  m_Layer: 0
+  m_Name: EventSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &857225163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857225162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
+  m_HorizontalAxis: Horizontal
+  m_VerticalAxis: Vertical
+  m_SubmitButton: Submit
+  m_CancelButton: Cancel
+  m_InputActionsPerSecond: 10
+  m_RepeatDelay: 0.5
+  m_ForceModuleActive: 0
+--- !u!114 &857225164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857225162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_FirstSelected: {fileID: 0}
+  m_sendNavigationEvents: 1
+  m_DragThreshold: 10
+--- !u!4 &857225165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857225162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1765316763
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,3 +518,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 1765316766}
   - {fileID: 673166274}
+  - {fileID: 857225165}
