@@ -35,7 +35,7 @@ public class MarkSpawner : MonoBehaviour
         Debug.Log("xOffSet: " + xOffSet);
         Debug.Log("yOffSet: " + yOffSet);
 
-        // 
+        
         // Charles de Gaulle Airport 49.0096906 2.5479245
         spawnMarkAtLatLong(49.0096906, 2.5479245, mapZoom);
         // Orly Airport 48.7262433 2.3652472
@@ -46,12 +46,13 @@ public class MarkSpawner : MonoBehaviour
         spawnMarkAtLatLong(43.6293863, 1.367682, mapZoom);
         // Paris Airport-Le Bourget 48.9614725 2.437202
         spawnMarkAtLatLong(48.9614725, 2.437202, mapZoom);
-
-        // iceland: 64.9631° N, -19.0208° W
-        spawnMarkAtLatLong(64.9631, -19.0208, mapZoom);
-
         //leonardo da vinci airport: 41.7999° N, 12.2462° E
         spawnMarkAtLatLong(41.7999, 12.2462, mapZoom);
+        // Stuttgart 48.77845 9.18001
+        spawnMarkAtLatLong(48.77845, 9.18001, mapZoom);
+        //Konstanz 47.69009 9.18825
+        spawnMarkAtLatLong(47.69009, 9.18825, mapZoom);
+
     }
 
     // Update is called once per frame

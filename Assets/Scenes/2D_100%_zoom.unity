@@ -650,9 +650,9 @@ MonoBehaviour:
   _numElevationTileFallbackLods: 2
   _requestTilesAroundView: 1
   _center:
-    _latitude: 41.7998868
-    _longitude: 12.2462384
-  _zoomLevel: 2.83
+    _latitude: 0
+    _longitude: 0
+  _zoomLevel: 1
   _minimumZoomLevel: 1
   _maximumZoomLevel: 6
   _mapTerrainType: 0
