@@ -172,9 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mark: {fileID: 5809604617773700780, guid: b35627f114ae9f44bbd185504e7e4f76, type: 3}
   parent: {fileID: 119067103}
-  longituteCenter: 47.67
-  latitudeCenter: 9.1
-  mapZoom: 0
+  map: {fileID: 673166273}
 --- !u!1 &343450428
 GameObject:
   m_ObjectHideFlags: 0
@@ -652,9 +650,9 @@ MonoBehaviour:
   _numElevationTileFallbackLods: 2
   _requestTilesAroundView: 1
   _center:
-    _latitude: 0
-    _longitude: 0
-  _zoomLevel: 1
+    _latitude: 41.7998868
+    _longitude: 12.2462384
+  _zoomLevel: 2.83
   _minimumZoomLevel: 1
   _maximumZoomLevel: 6
   _mapTerrainType: 0

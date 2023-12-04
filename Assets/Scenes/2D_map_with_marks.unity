@@ -172,8 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mark: {fileID: 5809604617773700780, guid: b35627f114ae9f44bbd185504e7e4f76, type: 3}
   parent: {fileID: 119067103}
-  longituteCenter: 47.67
-  latitudeCenter: 9.1
+  map: {fileID: 673166273}
 --- !u!1 &343450428
 GameObject:
   m_ObjectHideFlags: 0
