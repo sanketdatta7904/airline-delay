@@ -19,15 +19,8 @@ public class MarkSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // get the map zoom
-        mapZoom = map.GetComponent<MapRenderer>().ZoomLevel;
-        longituteCenter = map.GetComponent<MapRenderer>().Center.LongitudeInDegrees;
-        latitudeCenter = map.GetComponent<MapRenderer>().Center.LatitudeInDegrees;
-        xOffSet = NormalizeLongitudeWebMercator(longituteCenter, mapZoom);
-        yOffSet = NormalizeLatitudeWebMercator(latitudeCenter, mapZoom);
-
-
-
+        // set the variables for the map
+        updateLocation();
 
         Debug.Log("mapZoom: " + mapZoom);
         Debug.Log("longituteCenter: " + longituteCenter);
@@ -58,7 +51,43 @@ public class MarkSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // destroy all marks
+        foreach (Transform child in parent.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        // update variables
+        updateLocation();
+        drawAirports();
+    }
+
+    private void updateLocation()
+    {
+        mapZoom = map.GetComponent<MapRenderer>().ZoomLevel;
+        longituteCenter = map.GetComponent<MapRenderer>().Center.LongitudeInDegrees;
+        latitudeCenter = map.GetComponent<MapRenderer>().Center.LatitudeInDegrees;
+        xOffSet = NormalizeLongitudeWebMercator(longituteCenter, mapZoom);
+        yOffSet = NormalizeLatitudeWebMercator(latitudeCenter, mapZoom);
+    }
+
+    private void drawAirports()
+    {
+        // Charles de Gaulle Airport 49.0096906 2.5479245
+        spawnMarkAtLatLong(49.0096906, 2.5479245, mapZoom);
+        // Orly Airport 48.7262433 2.3652472
+        spawnMarkAtLatLong(48.7262433, 2.3652472, mapZoom);
+        // Lyon-Saint Exupéry Airport 45.720362 5.079507
+        spawnMarkAtLatLong(45.720362, 5.079507, mapZoom);
+        //Toulouse-Blagnac Airport 43.6293863 1.367682
+        spawnMarkAtLatLong(43.6293863, 1.367682, mapZoom);
+        // Paris Airport-Le Bourget 48.9614725 2.437202
+        spawnMarkAtLatLong(48.9614725, 2.437202, mapZoom);
+        //leonardo da vinci airport: 41.7999° N, 12.2462° E
+        spawnMarkAtLatLong(41.7999, 12.2462, mapZoom);
+        // Stuttgart 48.77845 9.18001
+        spawnMarkAtLatLong(48.77845, 9.18001, mapZoom);
+        //Konstanz 47.69009 9.18825
+        spawnMarkAtLatLong(47.69009, 9.18825, mapZoom);
     }
 
     // spawn a mark. 
