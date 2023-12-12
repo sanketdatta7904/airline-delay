@@ -172,6 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mark: {fileID: 5809604617773700780, guid: b35627f114ae9f44bbd185504e7e4f76, type: 3}
   parent: {fileID: 119067103}
+  allPoints: []
   map: {fileID: 673166273}
 --- !u!1 &343450428
 GameObject:
@@ -524,9 +525,9 @@ GameObject:
   - component: {fileID: 673166278}
   - component: {fileID: 673166277}
   - component: {fileID: 673166276}
-  - component: {fileID: 673166275}
   - component: {fileID: 673166283}
   - component: {fileID: 673166282}
+  - component: {fileID: 673166284}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -549,27 +550,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
---- !u!65 &673166275
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 673166273}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 2.54, y: 0.3, z: 1}
-  m_Center: {x: 0, y: 0.15, z: 0}
 --- !u!114 &673166276
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -582,7 +562,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ef50f6f9318ded40b230c1eefb7f968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _percentUtilization: 0.3
+  _percentUtilization: 0.35
   _maxCacheSizeInBytes: 2147483648
 --- !u!114 &673166277
 MonoBehaviour:
@@ -591,7 +571,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 673166273}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02c7d1b323594a144ac9b98fd93e0f7f, type: 3}
   m_Name: 
@@ -646,7 +626,7 @@ MonoBehaviour:
   _mapSession: {fileID: 673166281}
   _mapEdgeColor: {r: 0.6745098, g: 0.7803922, b: 0.9490197, a: 1}
   _mapEdgeColorFadeDistance: 0.009
-  _detailOffset: 0
+  _detailOffset: 1
   _numElevationTileFallbackLods: 2
   _requestTilesAroundView: 1
   _center:
@@ -655,7 +635,7 @@ MonoBehaviour:
   _zoomLevel: 4.3
   _minimumZoomLevel: 3
   _maximumZoomLevel: 6
-  _mapTerrainType: 0
+  _mapTerrainType: 2
   _mapShape: 0
   _localMapDimension: {x: 2.54, y: 1}
   _localMapRadius: 0.5
@@ -668,7 +648,7 @@ MonoBehaviour:
   _isClippingVolumeWallEnabled: 1
   _clippingVolumeMaterial: {fileID: 0}
   _clippingVolumeDistanceTextureResolution: 2
-  _clippingDistanceLayer: 23
+  _clippingDistanceLayer: 31
   _textureTileLayers:
     _list:
     - {fileID: 673166279}
@@ -677,7 +657,7 @@ MonoBehaviour:
     - {fileID: 673166278}
   _hideTileLayerComponents: 1
   _mapColliderType: 1
-  _mapCollider: {fileID: 673166275}
+  _mapCollider: {fileID: 673166284}
 --- !u!114 &673166281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -738,6 +718,27 @@ MonoBehaviour:
   _onInteractionEnded:
     m_PersistentCalls:
       m_Calls: []
+--- !u!65 &673166284
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673166273}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.54, y: 0.3, z: 1}
+  m_Center: {x: 0, y: 0.15, z: 0}
 --- !u!1 &857225162
 GameObject:
   m_ObjectHideFlags: 0
