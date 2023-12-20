@@ -1,16 +1,23 @@
 import sqlite3
 import time
 
-conn = sqlite3.connect(r'C:\Users\Sanket PC\Desktop\group-2\sqlite\aviation111.db')
+conn = sqlite3.connect('D:/sqlite/aviation.db')
 
-query = "SELECT airport_code, airport_name, latitude, longitude, avg_delay FROM aggregated_delays ORDER BY `avg_delay` DESC;"  
 
+query_for_filghts_data = "SELECT adep_name, ADEP Latitude, ADEP Longitude, ades_name, ADES Latitude, ADES Longitude, `delay (minutes)` FROM flights_data ORDER BY `delay (minutes)` DESC;" 
+
+query_for_aggregated_delays = "SELECT ades_type, AVG(`avg_delay`) AS avg_delay FROM aggregated_delays GROUP BY ades_type;" 
+
+query_for_route_delays = """SELECT RouteID, SUM(delay) as TotalDelay
+FROM route_delay
+WHERE Date BETWEEN '2015-03-01' AND '2018-09-01'
+GROUP BY RouteID;"""
 start_time = time.time()
 
-cursor = conn.execute(query)
+cursor = conn.execute(query_for_route_delays)
 
 results = cursor.fetchall()
-
+# print(results)
 execution_time = time.time() - start_time
 
 print(f"Query executed in {execution_time:.6f} seconds")
