@@ -2,7 +2,7 @@ using UnityEngine;
 using Microsoft.Maps.Unity;
 using System;
 using System.Data;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 
 public class MarkSpawner : MonoBehaviour
 {
@@ -23,7 +23,7 @@ public class MarkSpawner : MonoBehaviour
         updateLocation();
 
         string dbPath = "URI=file:" + Application.dataPath + "/Aviation111.db";
-        IDbConnection dbConnection = new SqliteConnection(dbPath);
+        IDbConnection dbConnection = new SQLiteConnection(dbPath);
 
         try
         {
