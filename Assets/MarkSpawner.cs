@@ -22,7 +22,6 @@ public class MarkSpawner : MonoBehaviour
 
     public GameObject map;
     // Reference to the UI Text for the tooltip
-    public Text tooltipText;
 
     void Start()
     {
@@ -127,9 +126,18 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
 
-        // Attach a script to the mark GameObject to handle mouse hover events (replace HoverScript with your actual script)
-        //HoverScript hoverscript = mark.AddComponent<HoverScript>();
-        //hoverScript.SetupTooltip(airportName, airportCode, latitude, longitude);
+        // add a circle collider and rigidbody 2d to the mark
+        markInstance.AddComponent<CircleCollider2D>();
+        markInstance.GetComponent<CircleCollider2D>().radius = 0.5f;
+        markInstance.GetComponent<CircleCollider2D>().isTrigger = true;
+        markInstance.AddComponent<Rigidbody2D>();
+        markInstance.GetComponent<Rigidbody2D>().gravityScale = 0;
+
+        // add the tooltip script to the mark
+        string tooltipText = $"Airport Name: {airportName}\nAirport Code: {airportCode}\nAverage Delay: {avgDelay}";
+        markInstance.AddComponent<Tooltip>();
+        markInstance.GetComponent<Tooltip>().message = tooltipText;
+
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
     }
