@@ -7,6 +7,11 @@ public class PointScript : MonoBehaviour
     // coordinates of the point
     public double latitude = 0.0;
     public double longitude = 0.0;
+    // information about the point
+    public string airportName = "";
+    public string airportCode = "";
+    public string size = ""; // "small", "medium", "large"
+
     // Start is called before the first frame update
     void Start()
     {
