@@ -3,6 +3,7 @@ using Microsoft.Maps.Unity;
 using System;
 using System.Data;
 using System.Data.SQLite;
+using UnityEngine.UI;
 
 public class MarkSpawner : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class MarkSpawner : MonoBehaviour
     private double yOffSet = 0.0f;
 
     public GameObject map;
+    // Reference to the UI Text for the tooltip
+    public Text tooltipText;
 
     void Start()
     {
@@ -41,10 +44,10 @@ public class MarkSpawner : MonoBehaviour
             while (reader.Read())
             {
                 // iterate over all the rows in the table
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    Debug.Log(reader.GetName(i) + ": " + reader[i]);
-                }
+                //for (int i = 0; i < reader.FieldCount; i++)
+                //{
+                //    Debug.Log(reader.GetName(i) + ": " + reader[i]);
+                //}
 
                 string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
                 string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
@@ -123,6 +126,10 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().size = size;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
+
+        // Attach a script to the mark GameObject to handle mouse hover events (replace HoverScript with your actual script)
+        HoverScript hoverScript = mark.AddComponent<HoverScript>();
+        hoverScript.SetupTooltip(airportName, airportCode, latitude, longitude);
 
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
