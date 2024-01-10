@@ -33,32 +33,32 @@ public class MarkSpawner : MonoBehaviour
             dbConnection.Open();
 
             // Query to select latitude and longitude from the aggregated_delays table
-            string query = "SELECT latitude, longitude FROM aggregated_delays";
+            string query = "SELECT * FROM aggregated_delays";
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
             IDataReader reader = dbCommand.ExecuteReader();
             while (reader.Read())
             {
-                object latitudeObject = reader["latitude"];
-                object longitudeObject = reader["longitude"];
-                /*object averageDelayObject = reader["avg_delay"];
-                object airportNameObject = reader["airport_name"];
-                object airportCodeObject = reader["airport_code"];*/
+                // iterate over all the rows in the table
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    Debug.Log(reader.GetName(i) + ": " + reader[i]);
+                }
 
-                // Check for DBNull before conversion
-                double latitude = DBNull.Value.Equals(latitudeObject) ? 0.0 : Convert.ToDouble(latitudeObject);
-                double longitude = DBNull.Value.Equals(longitudeObject) ? 0.0 : Convert.ToDouble(longitudeObject);
-                //double delay = DBNull.Value.Equals(averageDelayObject) ? 0.0 : Convert.ToDouble(averageDelayObject);
-                //string airportName = DBNull.Value.Equals(airportNameObject) ? "" : Convert.ToString(airportNameObject);
-                //string airportCode = DBNull.Value.Equals(airportCodeObject) ? "" : Convert.ToString(airportCodeObject);
-                //double size = Convert.ToDouble(airportCode) % 3;
-                //string sizeString = size == 0 ? "small" : size == 1 ? "medium" : "large";
-                int random = UnityEngine.Random.Range(0, 3);
-                string sizeString = random == 0 ? "small" : random == 1 ? "medium" : "large";
+                string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
+                string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
+                double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
+                double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
+                double avgDelay = DBNull.Value.Equals(reader["avg_delay"]) ? 0.0 : Convert.ToDouble(reader["avg_delay"]);
+
+
+
+                string sizeString = avgDelay>10? "large": avgDelay>0? "medium": "small";
+
 
                 // Spawn a mark for each latitude and longitude
-                SpawnMarkAtLatLong(latitude, longitude, "name", "code", sizeString);
+                SpawnMarkAtLatLong(latitude, longitude, airportName, airportCode, sizeString, avgDelay);
             }
         }
         catch (Exception e)
@@ -107,7 +107,7 @@ public class MarkSpawner : MonoBehaviour
      * @param airportCode - the code of the airport
      * @param size - the size of the airport (small, medium, large)
      */
-    public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size)
+    public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size, double avgDelay)
     {
         float x = (float)CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
         float y = (float)CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
@@ -121,6 +121,7 @@ public class MarkSpawner : MonoBehaviour
                 markInstance.GetComponent<PointScript>().airportName = airportName;
         markInstance.GetComponent<PointScript>().airportCode = airportCode;
         markInstance.GetComponent<PointScript>().size = size;
+        markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
 
         Array.Resize(ref allPoints, allPoints.Length + 1);
