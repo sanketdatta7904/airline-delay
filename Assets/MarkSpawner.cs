@@ -128,9 +128,8 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
 
         // Attach a script to the mark GameObject to handle mouse hover events (replace HoverScript with your actual script)
-        HoverScript hoverScript = mark.AddComponent<HoverScript>();
-        hoverScript.SetupTooltip(airportName, airportCode, latitude, longitude);
-
+        //HoverScript hoverscript = mark.AddComponent<HoverScript>();
+        //hoverScript.SetupTooltip(airportName, airportCode, latitude, longitude);
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
     }

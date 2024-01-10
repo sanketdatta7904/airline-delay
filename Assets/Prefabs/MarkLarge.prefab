@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7631300910470783316}
   - component: {fileID: 240373560428094206}
   - component: {fileID: 2097307663380632451}
+  - component: {fileID: 5780495299353675576}
   m_Layer: 0
   m_Name: MarkLarge
   m_TagString: Untagged
@@ -99,3 +100,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   latitude: 0
   longitude: 0
+  airportName: 
+  airportCode: 
+  size: 
+  avgDelay: 0
+--- !u!114 &5780495299353675576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763380326231720652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 123cf4c11d86bb845a867a91d6546533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

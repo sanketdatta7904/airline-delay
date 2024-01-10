@@ -28,6 +28,23 @@ public class PointScript : MonoBehaviour
         
     }
 
+
+
+    void OnMouseEnter()
+    {
+        Debug.Log("Mouse enter");
+        // Display the tooltip when the mouse hovers over the mark
+        //tooltipText.text = $"Airport: {airportName}\nCode: {airportCode}\nLatitude: {latitude}\nLongitude: {longitude}";
+        //tooltipText.gameObject.SetActive(true);
+    }
+
+    void OnMouseExit()
+    {
+        Console.WriteLine("Mouse exit");
+        // Hide the tooltip when the mouse exits the mark
+        //tooltipText.gameObject.SetActive(false);
+    }
+
     public void Redraw(float zoom)
     {
         // depending on the map zoom, we dont want to see all the points
