@@ -2,7 +2,14 @@ using UnityEngine;
 using Microsoft.Maps.Unity;
 using System;
 using System.Data;
-using System.Data.SQLite;
+// import SQLite on windows platform
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+    using System.Data.SQLite;
+#endif
+// import SQLite on macOS platform
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+    using Mono.Data.Sqlite;
+#endif
 
 public class MarkSpawner : MonoBehaviour
 {
@@ -23,7 +30,14 @@ public class MarkSpawner : MonoBehaviour
         updateLocation();
 
         string dbPath = "URI=file:" + Application.dataPath + "/Aviation111.db";
-        IDbConnection dbConnection = new SQLiteConnection(dbPath);
+        // either use SQLite on windows platform or Sqlite on macOS platform
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            IDbConnection dbConnection = new SQLiteConnection(dbPath);
+#endif
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            IDbConnection dbConnection = new SqliteConnection(dbPath);
+#endif
+        //IDbConnection dbConnection = new SQLiteConnection(dbPath);
 
         try
         {
