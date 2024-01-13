@@ -120,7 +120,7 @@ public class MarkSpawner : MonoBehaviour
         markInstance.transform.parent = parent.transform;
         markInstance.GetComponent<PointScript>().latitude = latitude;
         markInstance.GetComponent<PointScript>().longitude = longitude;
-                markInstance.GetComponent<PointScript>().airportName = airportName;
+        markInstance.GetComponent<PointScript>().airportName = airportName;
         markInstance.GetComponent<PointScript>().airportCode = airportCode;
         markInstance.GetComponent<PointScript>().size = size;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
