@@ -4,15 +4,15 @@ import os
 from datetime import datetime
 
 # Directory path containing CSV files
-csv_directory = 'D:/Powerwall sqlite/files'
+csv_directory = 'D:/sqlite/files'
 
-airport_data = pd.read_csv('D:/Powerwall sqlite/airport code and names/airport-codes_csv.csv')
+airport_data = pd.read_csv('D:/sqlite/airport code and names/airport-codes_csv.csv')
 
 # airport_mapping = airport_data.set_index('Code')[['Name', 'Type']].to_dict(orient='index')
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/Powerwall sqlite/aviation.db'  
+sqlite_db_path = 'D:/sqlite/aviation.db'  
 
 # connection to the SQLite database
 conn = sqlite3.connect(sqlite_db_path)

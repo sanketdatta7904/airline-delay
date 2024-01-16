@@ -22,3 +22,4 @@ GROUP BY f.ADES;
 
 -- Indexing on the new table for faster retrieval if needed
 CREATE INDEX idx_airport_name_delay ON aggregated_delays (airport_name);
+
