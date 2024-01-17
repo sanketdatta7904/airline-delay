@@ -23,7 +23,7 @@ public class MarkSpawner : MonoBehaviour
     public GameObject[] allPoints;
     public static float mapZoom = 1.0f;
     public GameObject map;
-    public bool enableTooltip = false;
+
 
     private double longitudeCenter;
     private double latitudeCenter;
@@ -135,21 +135,6 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().size = size;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
-
-        if (enableTooltip)
-        {
-            // add a circle collider and rigidbody 2d to the mark
-            markInstance.AddComponent<CircleCollider2D>();
-            markInstance.GetComponent<CircleCollider2D>().radius = 0.5f;
-            markInstance.GetComponent<CircleCollider2D>().isTrigger = true;
-            markInstance.AddComponent<Rigidbody2D>();
-            markInstance.GetComponent<Rigidbody2D>().gravityScale = 0;
-
-            // add the tooltip script to the mark
-            string tooltipText = $"Airport Name: {airportName}\nAirport Code: {airportCode}\nAverage Delay: {avgDelay}";
-            markInstance.AddComponent<Tooltip>();
-            markInstance.GetComponent<Tooltip>().message = tooltipText;
-        }
         
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
