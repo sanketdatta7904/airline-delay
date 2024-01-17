@@ -94,11 +94,21 @@ public class MarkSpawner : MonoBehaviour
 
     void Update()
     {
-        if (mapZoom != map.GetComponent<MapRenderer>().ZoomLevel ||
+        bool zoomChanged = mapZoom != map.GetComponent<MapRenderer>().ZoomLevel;
+        if (zoomChanged ||
             longitudeCenter != map.GetComponent<MapRenderer>().Center.LongitudeInDegrees ||
             latitudeCenter != map.GetComponent<MapRenderer>().Center.LatitudeInDegrees)
         {
             updateLocation();
+        }
+
+        if (zoomChanged)
+        {
+            // iterate over the points kd tree and redraw the points with the new zoom
+            foreach (PointScript point in allPointsKd)
+            {
+                point.Redraw(mapZoom);
+            }
         }
     }
 
