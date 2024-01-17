@@ -15,6 +15,12 @@ public class PointScript : MonoBehaviour
     public string airportCode = "";
     public string size = ""; // "small", "medium", "large"
     public double avgDelay = 0.0; // average delay of the airport
+    public bool hidePointsOffMap = false;
+
+    private double maxX = 1.3;
+    private double maxY = 0.51;
+    private double minX = -1.3;
+    private double minY = -0.51;
 
     // Start is called before the first frame update
     void Start()
@@ -73,8 +79,26 @@ public class PointScript : MonoBehaviour
         double x = CoordinatConverter.NormalizeLongitudeWebMercator(longitude, zoom);
         double y = CoordinatConverter.NormalizeLatitudeWebMercator(latitude, zoom);
 
-        // change the position of the point
-        //transform.localScale = Vector3.one;
-        transform.localPosition = new Vector3((float)x, (float)y, 0.0f);
+        // check if the point is out of bounds. If it is, save performance by disabling the sprite renderer
+        // additionally we want to disable the rigidbody and collider
+        if (hidePointsOffMap && (x > maxX || x < minX || y > maxY || y < minY))
+        {
+            // disable the sprite renderer, rigidbody and collider
+            GetComponent<SpriteRenderer>().enabled = false;
+            //GetComponent<Rigidbody2D>().simulated = false;
+            //GetComponent<CircleCollider2D>().enabled = false;
+        }
+        else
+        {
+            // enable the sprite renderer, rigidbody and collider
+            GetComponent<SpriteRenderer>().enabled = true;
+            //GetComponent<Rigidbody2D>().simulated = true;
+            //GetComponent<CircleCollider2D>().enabled = true;
+
+            // change the position of the point
+            transform.localPosition = new Vector3((float)x, (float)y, 0.0f);
+        }
+
+        
     }
 }

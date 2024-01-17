@@ -21,14 +21,15 @@ public class MarkSpawner : MonoBehaviour
     public GameObject markLarge;
     public GameObject parent;
     public GameObject[] allPoints;
+    public static float mapZoom = 1.0f;
+    public GameObject map;
+    public bool enableTooltip = false;
+
     private double longitudeCenter;
     private double latitudeCenter;
-    public static float mapZoom = 1.0f;
-
     private double xOffSet = 0.0f;
     private double yOffSet = 0.0f;
 
-    public GameObject map;
 
     void Start()
     {
@@ -140,17 +141,21 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
 
-        // add a circle collider and rigidbody 2d to the mark
-        markInstance.AddComponent<CircleCollider2D>();
-        markInstance.GetComponent<CircleCollider2D>().radius = 0.5f;
-        markInstance.GetComponent<CircleCollider2D>().isTrigger = true;
-        markInstance.AddComponent<Rigidbody2D>();
-        markInstance.GetComponent<Rigidbody2D>().gravityScale = 0;
+        if (enableTooltip)
+        {
+            // add a circle collider and rigidbody 2d to the mark
+            markInstance.AddComponent<CircleCollider2D>();
+            markInstance.GetComponent<CircleCollider2D>().radius = 0.5f;
+            markInstance.GetComponent<CircleCollider2D>().isTrigger = true;
+            markInstance.AddComponent<Rigidbody2D>();
+            markInstance.GetComponent<Rigidbody2D>().gravityScale = 0;
 
-        // add the tooltip script to the mark
-        string tooltipText = $"Airport Name: {airportName}\nAirport Code: {airportCode}\nAverage Delay: {avgDelay}";
-        markInstance.AddComponent<Tooltip>();
-        markInstance.GetComponent<Tooltip>().message = tooltipText;
+            // add the tooltip script to the mark
+            string tooltipText = $"Airport Name: {airportName}\nAirport Code: {airportCode}\nAverage Delay: {avgDelay}";
+            markInstance.AddComponent<Tooltip>();
+            markInstance.GetComponent<Tooltip>().message = tooltipText;
+        }
+        
 
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
