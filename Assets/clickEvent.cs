@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class clickEvent : MonoBehaviour
 {
@@ -25,8 +26,28 @@ public class clickEvent : MonoBehaviour
         // convert mouse position to world position
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
 
-        // get the closest object
-        MarkSpawner.getClosestPoint(worldPos);
 
+        // get the closest object
+        PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
+        // get the distamce between the two points
+        float distance = Vector3.Distance(nearestObj.transform.position, worldPos);
+        string message = "Airport Name: " + nearestObj.airportName + "\n" +
+                         "Airport Code: " + nearestObj.airportCode + "\n" +
+                         "Average Delay: " + nearestObj.avgDelay + "\n" +
+                         "Distance: " + distance;
+        Debug.Log(distance);
+
+        if(distance < 1.0005)
+            TooltipManager._instance.SetAndShowTooltip(message);
+        else
+            TooltipManager._instance.HideTooltip();
     }
+
+    //mouse move listener
+    //private void OnMouseOver()
+    //{
+    //    Debug.Log("Mouse over");
+
+    //}
+
 }

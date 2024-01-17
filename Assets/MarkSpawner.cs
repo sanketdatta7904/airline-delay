@@ -143,13 +143,9 @@ public class MarkSpawner : MonoBehaviour
         allPointsKd.Add(markInstance.GetComponent<PointScript>());
     }
 
-    public static void getClosestPoint(Vector3 position)
+    public static PointScript getClosestPoint(Vector3 position)
     {
         PointScript nearestObj = allPointsKd.FindClosest(position);
-        // get the distamce between the two points
-        float distance = Vector3.Distance(nearestObj.transform.position, position);
-        // if the distance is less than 0.1, then we have clicked on the point
-  
-        Debug.Log(nearestObj.airportName + " ;distance: " + distance);
+        return nearestObj;
     }
 }

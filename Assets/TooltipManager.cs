@@ -32,6 +32,12 @@ public class TooltipManager : MonoBehaviour
     void Update()
     {
         transform.position = Input.mousePosition;
+        // this sets the middle of the tooltip to the mouse position
+        // we wamt to put the bootom left corner of the tooltip to the mouse position
+        // so we need to add an offset
+        double xOffset = 250;
+        double yOffset = 110;
+        transform.position = new Vector3((float)(transform.position.x + xOffset), (float)(transform.position.y + yOffset), transform.position.z);
     }
 
     public void SetAndShowTooltip(string text)
@@ -44,5 +50,13 @@ public class TooltipManager : MonoBehaviour
     {
         gameObject.SetActive(false);
         textComponent.text = string.Empty;
+    }
+
+    public void ToggleTooltip()
+    {
+        if (textComponent.text != string.Empty)
+        {
+            TooltipManager._instance.HideTooltip();
+        }
     }
 }
