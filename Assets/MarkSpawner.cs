@@ -39,7 +39,9 @@ public class MarkSpawner : MonoBehaviour
         updateLocation();
 
         //string dbPath = "URI=file:" + Application.dataPath + "/Aviation111.db";
-        string dbPath = "D:/APVE23-24/Group%2/aviation.db";
+        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+        Debug.Log(dbPath);
+        //string dbPath = 'D:/APVE23-24/"Group 2"/aviation.db';
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
             IDbConnection dbConnection = new SQLiteConnection(dbPath);
@@ -52,10 +54,14 @@ public class MarkSpawner : MonoBehaviour
         try
         {
             dbConnection.Open();
-
             // Query to select latitude and longitude from the aggregated_delays table
-            //string query = "SELECT * FROM aggregated_delays";
             string query = "SELECT * FROM aggregated_delays";
+
+            // query_for_route_delays 
+            //string query = "SELECT RouteID, Year, Quarter, TotalDelay FROM route_delay_quarterly WHERE (Year > 2014 OR (Year = 2015 AND Quarter >= 4)) AND (Year < 2016 OR (Year = 2017 AND Quarter <= 2));";
+            //string query = "SELECT * FROM flights_data";
+
+
 
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
@@ -64,14 +70,14 @@ public class MarkSpawner : MonoBehaviour
             while (reader.Read())
             {
                 // iterate over all the rows in the table
-                //for (int i = 0; i < reader.FieldCount; i++)
-                //{
-                //    Debug.Log(reader.GetName(i) + ": " + reader[i]);
-                //}
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    Debug.Log(reader.GetName(i) + ": " + reader[i]);
+                }
 
                 string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
                 string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
-                string airportType = DBNull.Value.Equals(reader["adep_type"]) ? string.Empty : reader["adep_type"].ToString();
+                string airportType = DBNull.Value.Equals(reader["ades_type"]) ? string.Empty : reader["ades_type"].ToString();
 
                 double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
                 double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
@@ -79,7 +85,9 @@ public class MarkSpawner : MonoBehaviour
 
 
 
-                string sizeString = avgDelay>10? "large": avgDelay>0? "medium": "small";
+                //string sizeString = avgDelay > 10 ? "large" : avgDelay > 0 ? "medium" : "small";
+                string sizeString = airportType == "large_airport" ? "large": airportType == "medium_airport" ? "medium" : airportType == "small_airport" ? "small" : "other";
+
 
 
                 // Spawn a mark for each latitude and longitude
