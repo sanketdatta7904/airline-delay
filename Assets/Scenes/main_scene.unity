@@ -177,7 +177,6 @@ MonoBehaviour:
   parent: {fileID: 119067103}
   allPoints: []
   map: {fileID: 673166273}
-  enableTooltip: 0
 --- !u!1 &343450428
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,6 +531,7 @@ GameObject:
   - component: {fileID: 673166275}
   - component: {fileID: 673166283}
   - component: {fileID: 673166282}
+  - component: {fileID: 673166284}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -743,6 +743,18 @@ MonoBehaviour:
   _onInteractionEnded:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &673166284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673166273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3708e01b8875e240a39cb5fca7edad3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &857225162
 GameObject:
   m_ObjectHideFlags: 0
