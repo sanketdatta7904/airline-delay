@@ -14,7 +14,7 @@ public class Controller : MonoBehaviour
     void Update()
     {
         // random walk
-        transform.position += new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1)) * Speed * Time.deltaTime;
+        //transform.position += new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), Random.Range(-1, 1)) * Speed * Time.deltaTime;
 
     }
 }

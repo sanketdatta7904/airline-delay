@@ -31,20 +31,7 @@ public class PointScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // current position of the point
-        double x = transform.localPosition.x;
-        double y = transform.localPosition.y;
-        if ((x > maxX || x < minX || y > maxY || y < minY))
-        {
-            Debug.Log("x: " + x + " maxX: " + maxX + " minX: " + minX + " y: " + y + " maxY: " + maxY + " minY: " + minY);
-            // disable the sprite renderer, rigidbody and collider
-            GetComponent<SpriteRenderer>().enabled = false;
-
-        }
-        else
-        {
-            GetComponent<SpriteRenderer>().enabled = true;
-        }
+ 
     }
 
 

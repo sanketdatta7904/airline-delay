@@ -30,6 +30,9 @@ public class MarkSpawner : MonoBehaviour
     private double xOffSet = 0.0f;
     private double yOffSet = 0.0f;
 
+    // kd tree
+    private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
+
 
     void Start()
     {
@@ -135,8 +138,18 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().size = size;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
-        
-        Array.Resize(ref allPoints, allPoints.Length + 1);
-        allPoints[allPoints.Length - 1] = markInstance;
+
+        // add the gameObject to the kd tree
+        allPointsKd.Add(markInstance.GetComponent<PointScript>());
+    }
+
+    public static void getClosestPoint(Vector3 position)
+    {
+        PointScript nearestObj = allPointsKd.FindClosest(position);
+        // get the distamce between the two points
+        float distance = Vector3.Distance(nearestObj.transform.position, position);
+        // if the distance is less than 0.1, then we have clicked on the point
+  
+        Debug.Log(nearestObj.airportName + " ;distance: " + distance);
     }
 }
