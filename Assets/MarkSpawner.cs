@@ -38,7 +38,8 @@ public class MarkSpawner : MonoBehaviour
     {
         updateLocation();
 
-        string dbPath = "URI=file:" + Application.dataPath + "/Aviation111.db";
+        //string dbPath = "URI=file:" + Application.dataPath + "/Aviation111.db";
+        string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
             IDbConnection dbConnection = new SQLiteConnection(dbPath);
@@ -53,7 +54,9 @@ public class MarkSpawner : MonoBehaviour
             dbConnection.Open();
 
             // Query to select latitude and longitude from the aggregated_delays table
+            //string query = "SELECT * FROM aggregated_delays";
             string query = "SELECT * FROM aggregated_delays";
+
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
@@ -68,6 +71,8 @@ public class MarkSpawner : MonoBehaviour
 
                 string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
                 string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
+                string airportType = DBNull.Value.Equals(reader["adep_type"]) ? string.Empty : reader["adep_type"].ToString();
+
                 double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
                 double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
                 double avgDelay = DBNull.Value.Equals(reader["avg_delay"]) ? 0.0 : Convert.ToDouble(reader["avg_delay"]);
@@ -78,7 +83,7 @@ public class MarkSpawner : MonoBehaviour
 
 
                 // Spawn a mark for each latitude and longitude
-                SpawnMarkAtLatLong(latitude, longitude, airportName, airportCode, sizeString, avgDelay);
+                SpawnMarkAtLatLong(latitude, longitude, airportName, airportCode, sizeString, avgDelay, airportType);
             }
         }
         catch (Exception e)
@@ -131,8 +136,9 @@ public class MarkSpawner : MonoBehaviour
      * @param airportName - the name of the airport
      * @param airportCode - the code of the airport
      * @param size - the size of the airport (small, medium, large)
+     * @param airportType - 
      */
-    public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size, double avgDelay)
+    public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size, double avgDelay, string airportType)
     {
         float x = (float)CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
         float y = (float)CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
@@ -146,6 +152,7 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().airportName = airportName;
         markInstance.GetComponent<PointScript>().airportCode = airportCode;
         markInstance.GetComponent<PointScript>().size = size;
+        markInstance.GetComponent<PointScript>().airportType = airportType;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
 
