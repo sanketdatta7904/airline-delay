@@ -177,6 +177,7 @@ MonoBehaviour:
   parent: {fileID: 119067103}
   allPoints: []
   map: {fileID: 673166273}
+  enableTooltip: 0
 --- !u!1 &343450428
 GameObject:
   m_ObjectHideFlags: 0

@@ -96,11 +96,6 @@ public class MarkSpawner : MonoBehaviour
             latitudeCenter != map.GetComponent<MapRenderer>().Center.LatitudeInDegrees)
         {
             updateLocation();
-
-            foreach (GameObject point in allPoints)
-            {
-                point.GetComponent<PointScript>().Redraw(mapZoom);
-            }
         }
     }
 
@@ -156,7 +151,6 @@ public class MarkSpawner : MonoBehaviour
             markInstance.GetComponent<Tooltip>().message = tooltipText;
         }
         
-
         Array.Resize(ref allPoints, allPoints.Length + 1);
         allPoints[allPoints.Length - 1] = markInstance;
     }

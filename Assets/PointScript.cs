@@ -15,7 +15,7 @@ public class PointScript : MonoBehaviour
     public string airportCode = "";
     public string size = ""; // "small", "medium", "large"
     public double avgDelay = 0.0; // average delay of the airport
-    public bool hidePointsOffMap = false;
+    public bool hidePointsOffMap = true;
 
     private double maxX = 1.3;
     private double maxY = 0.51;
@@ -31,7 +31,20 @@ public class PointScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // current position of the point
+        double x = transform.localPosition.x;
+        double y = transform.localPosition.y;
+        if ((x > maxX || x < minX || y > maxY || y < minY))
+        {
+            Debug.Log("x: " + x + " maxX: " + maxX + " minX: " + minX + " y: " + y + " maxY: " + maxY + " minY: " + minY);
+            // disable the sprite renderer, rigidbody and collider
+            GetComponent<SpriteRenderer>().enabled = false;
+
+        }
+        else
+        {
+            GetComponent<SpriteRenderer>().enabled = true;
+        }
     }
 
 
@@ -81,7 +94,8 @@ public class PointScript : MonoBehaviour
 
         // check if the point is out of bounds. If it is, save performance by disabling the sprite renderer
         // additionally we want to disable the rigidbody and collider
-        if (hidePointsOffMap && (x > maxX || x < minX || y > maxY || y < minY))
+        // disabled this for now because the maxX , maxY, minX, minY are not correct. They depend on the center of the map.
+        if (false && hidePointsOffMap && (x > maxX || x < minX || y > maxY || y < minY))
         {
             // disable the sprite renderer, rigidbody and collider
             GetComponent<SpriteRenderer>().enabled = false;
@@ -96,9 +110,9 @@ public class PointScript : MonoBehaviour
             //GetComponent<CircleCollider2D>().enabled = true;
 
             // change the position of the point
-            transform.localPosition = new Vector3((float)x, (float)y, 0.0f);
+            
         }
-
+        transform.localPosition = new Vector3((float)x, (float)y, 0.0f);
         
     }
 }
