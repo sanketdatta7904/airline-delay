@@ -74,10 +74,13 @@ public class MarkSpawner : MonoBehaviour
                 {
                     Debug.Log(reader.GetName(i) + ": " + reader[i]);
                 }
+                //string[] different_airport_types = { "large_airport", "medium_airport", "small_airport", "heliport", "closed", string.Empty };
+                //int randomIndex = UnityEngine.Random.Range(0, different_airport_types.Length);
 
                 string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
                 string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
                 string airportType = DBNull.Value.Equals(reader["ades_type"]) ? string.Empty : reader["ades_type"].ToString();
+                //string airportType = different_airport_types[randomIndex];
 
                 double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
                 double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
@@ -150,9 +153,13 @@ public class MarkSpawner : MonoBehaviour
     {
         float x = (float)CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
         float y = (float)CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
-        GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
+        //GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
+        float sizeScale = size == "large" ? 0.01f : size == "medium" ? 0.008f : size == "small" ? 0.006f : 0.004f;
+        UnityEngine.Color color = avgDelay > 50 ? Color.red : avgDelay > 10 ? Color.yellow : Color.green;
 
-        GameObject markInstance = Instantiate(mark, Vector3.zero, Quaternion.identity);
+
+
+        GameObject markInstance = Instantiate(markLarge, Vector3.zero, Quaternion.identity);
 
         markInstance.transform.parent = parent.transform;
         markInstance.GetComponent<PointScript>().latitude = latitude;
@@ -163,6 +170,11 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().airportType = airportType;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
         markInstance.GetComponent<PointScript>().Redraw(mapZoom);
+
+        // change the color of the mark
+        markInstance.GetComponent<SpriteRenderer>().color = color;
+        // change the size of the mark
+        markInstance.transform.localScale = new Vector3(sizeScale, sizeScale, sizeScale);
 
         // add the gameObject to the kd tree
         allPointsKd.Add(markInstance.GetComponent<PointScript>());
