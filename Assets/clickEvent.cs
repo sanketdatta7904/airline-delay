@@ -34,7 +34,8 @@ public class clickEvent : MonoBehaviour
         string message = "Airport Name: " + nearestObj.airportName + "\n" +
                          "Airport Code: " + nearestObj.airportCode + "\n" +
                          "Average Delay: " + nearestObj.avgDelay + "\n" +
-                         "Distance: " + distance;
+                         "Distance: " + distance + "\n" +
+                         "type: " + nearestObj.airportType;
         Debug.Log(distance);
 
         if(distance < 1.0005)
