@@ -16,6 +16,7 @@ public class PointScript : MonoBehaviour
     public string size = ""; // "small", "medium", "large"
     public double avgDelay = 0.0; // average delay of the airport
     public bool hidePointsOffMap = true;
+    public string airportType;
 
     private double maxX = 1.3;
     private double maxY = 0.51;
