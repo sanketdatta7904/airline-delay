@@ -57,7 +57,7 @@ protected override void DefaultChart()
             {
                 Debug.Log(reader.GetName(i) + ": " + reader[i]);
             }
-            // dsd
+ 
             string currentAirportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
             airportNames.Add(currentAirportName);
         }

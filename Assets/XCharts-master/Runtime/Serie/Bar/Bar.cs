@@ -2,16 +2,19 @@ using UnityEngine;
 using System;
 using System.Data;
 using System.Collections.Generic;
-
+// using System.Data.SQLite;
+using UnityEngine.UI;
+// import SQLite on windows platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-using System.Data.SQLite;
+    using System.Data.SQLite;
 #endif
-
+// import SQLite on macOS platform
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-using Mono.Data.Sqlite;
+    using Mono.Data.Sqlite;
 #endif
 
 namespace XCharts.Runtime
+
 {
     [System.Serializable]
     [SerieHandler(typeof(BarHandler), true)]
@@ -30,6 +33,15 @@ namespace XCharts.Runtime
         public static Serie AddDefaultSerie(BaseChart chart, string serieName)
         {
             var serie = chart.AddSerie<Bar>(serieName);
+
+            // Dummy data list
+            List<float> dummyData = new List<float> { 19f, 820f, 30f, 20f, 701f };
+
+            for (int i = 0; i < dummyData.Count; i++)
+            {
+                chart.AddData(serie.index, dummyData[i]);
+            }
+
             return serie;
         }
 
@@ -39,71 +51,6 @@ namespace XCharts.Runtime
             return newSerie;
         }
     }
-
-    // Your chart class (replace YourChartClass with the actual class name)
-    public class YourChartClass : BaseChart
-    {
-        protected override void DefaultChart()
-        {
-            string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
-            Debug.Log(dbPath);
-
-            IDbConnection dbConnection = null;
-            List<float> avgDelays = new List<float>();
-
-            #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-                dbConnection = new SQLiteConnection(dbPath);
-            #endif
-
-            #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-                dbConnection = new SqliteConnection(dbPath);
-            #endif
-
-            try
-            {
-                dbConnection.Open();
-                string query = "SELECT avg_delay FROM aggregated_delays LIMIT 5";
-                IDbCommand dbCommand = dbConnection.CreateCommand();
-                dbCommand.CommandText = query;
-
-                IDataReader reader = dbCommand.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    float currentAvgDelay = DBNull.Value.Equals(reader["avg_delay"]) ? 0f : Convert.ToSingle(reader["avg_delay"]);
-                    avgDelays.Add(currentAvgDelay);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error executing query: {e.Message}");
-            }
-            finally
-            {
-                if (dbConnection != null && dbConnection.State == ConnectionState.Open)
-                    dbConnection.Close();
-            }
-
-            // Clear existing data and components
-            RemoveData();
-            RemoveChartComponents<GridCoord>();
-            RemoveChartComponents<XAxis>();
-            RemoveChartComponents<YAxis>();
-
-            // Ensure necessary chart components are present
-            EnsureChartComponent<GridCoord>();
-            EnsureChartComponent<XAxis>();
-            EnsureChartComponent<YAxis>();
-
-            // Create a bar series and add it to the chart
-            Bar barSeries = (Bar)Bar.AddDefaultSerie(this, GenerateDefaultSerieName());
-
-
-            // Set the data for the Y-axis (values)
-            for (int i = 0; i < avgDelays.Count; i++)
-            {
-                barSeries.AddData(avgDelays[i]);
-            }
-        }
-    }
 }
+
+
