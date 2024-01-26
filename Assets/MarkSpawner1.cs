@@ -18,10 +18,10 @@ using System.Data.SQLite;
 public class MarkSpawner : MonoBehaviour
 {
 
-     public Material greenMaterial;
+    public Material greenMaterial;
     public Material redMaterial;
 
-        public Material yellowcolor;
+    public Material yellowcolor;
 
     public GameObject lineRendererPrefab;
     public GameObject mark;
@@ -135,11 +135,7 @@ public class MarkSpawner : MonoBehaviour
      */
     public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, string sizeString)
     {
-        float x1 = (float)CoordinatConverter.NormalizeLongitudeWebMercator(Source_longitude, mapZoom);
-        float y1 = (float)CoordinatConverter.NormalizeLatitudeWebMercator(Source_latitude, mapZoom);
 
-        float x2 = (float)CoordinatConverter.NormalizeLongitudeWebMercator(Dest_longitude, mapZoom);
-        float y2 = (float)CoordinatConverter.NormalizeLatitudeWebMercator(Dest_latitude, mapZoom);
         // GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
         GameObject mark = markMedium;
         Vector3 sourcePos = GetPositionFromLatLon(Source_latitude, Source_longitude);
@@ -175,21 +171,20 @@ public class MarkSpawner : MonoBehaviour
 
         GameObject lineRendererObj = Instantiate(lineRendererPrefab, Vector3.zero, Quaternion.identity);
 
-        // Adjust the LineRenderer's start and end positions relative to the parent
 
         LineRenderer lineRenderer = lineRendererObj.GetComponent<LineRenderer>();
         if (lineRenderer != null)
         {
-            int curveSegments = 20; // You can adjust the number of segments for smoothness
+            int curveSegments = 20;
             float curveHeight = benzierCurve; // Adjust the height of the curve
             Vector3[] bezierPoints = CalculateBezierPoints(markInstance1, markInstance2, curveHeight, curveSegments);
 
             lineRenderer.positionCount = bezierPoints.Length;
             lineRenderer.SetPositions(bezierPoints);
 
-            lineRenderer.startWidth = lineRendererWidth; 
+            lineRenderer.startWidth = lineRendererWidth;
             lineRenderer.endWidth = lineRendererWidth;
-             if (sizeString == "large")
+            if (sizeString == "large")
             {
                 lineRenderer.material = redMaterial;
             }
@@ -226,7 +221,7 @@ public class MarkSpawner : MonoBehaviour
             {
                 if (endpoint.LineRenderer != null)
                 {
-                    int curveSegments = 20; 
+                    int curveSegments = 20;
                     float curveHeight = benzierCurve;
                     Vector3[] bezierPoints = CalculateBezierPoints(endpoint.StartMarker, endpoint.EndMarker, curveHeight, curveSegments);
                     endpoint.LineRenderer.SetPositions(bezierPoints);
@@ -245,8 +240,8 @@ public class MarkSpawner : MonoBehaviour
             {
                 if (endpoint.LineRenderer != null)
                 {
-                    int curveSegments = 20; 
-                    float curveHeight = benzierCurve; 
+                    int curveSegments = 20;
+                    float curveHeight = benzierCurve;
                     Vector3[] bezierPoints = CalculateBezierPoints(endpoint.StartMarker, endpoint.EndMarker, curveHeight, curveSegments);
                     endpoint.LineRenderer.SetPositions(bezierPoints);
                 }
@@ -279,7 +274,7 @@ public class MarkSpawner : MonoBehaviour
 
         Vector3 p = uu * p0;
         p += 2 * u * t * p1;
-        p += tt * p2; 
+        p += tt * p2;
 
         return p;
     }
