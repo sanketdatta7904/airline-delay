@@ -170,11 +170,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5076752a83842194b987d98433e1d350, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  greenMaterial: {fileID: 2100000, guid: 5507777984b54d046bed978cc2199363, type: 2}
-  redMaterial: {fileID: 2100000, guid: b76442a20d1a4b44b9160bfcfb14d61a, type: 2}
-  yellowcolor: {fileID: 2100000, guid: c813745b89eda34428f7a187fea8e7ab, type: 2}
+  Greencolor: {fileID: 2100000, guid: 5507777984b54d046bed978cc2199363, type: 2}
+  Redcolor: {fileID: 2100000, guid: b76442a20d1a4b44b9160bfcfb14d61a, type: 2}
+  Yellowcolor: {fileID: 2100000, guid: c813745b89eda34428f7a187fea8e7ab, type: 2}
   lineRendererPrefab: {fileID: 820713822}
-  mark: {fileID: 5809604617773700780, guid: b35627f114ae9f44bbd185504e7e4f76, type: 3}
+  mark: {fileID: 4295352682144453668, guid: 238d4d3e25107504faff8ba1576cd4f7, type: 3}
   markSmall: {fileID: 4295352682144453668, guid: 238d4d3e25107504faff8ba1576cd4f7, type: 3}
   markMedium: {fileID: 6681253346826333217, guid: 4559632b4361d974eab102c6539355df, type: 3}
   markLarge: {fileID: 3763380326231720652, guid: 0819836d118f2244086d6e6ae199d17c, type: 3}

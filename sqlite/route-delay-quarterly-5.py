@@ -4,7 +4,7 @@ import time
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation.db' 
+sqlite_db_path = 'D:/sqlite/aviation_new.db' 
 
 
 
@@ -19,12 +19,14 @@ query_create_table = """CREATE TABLE route_delay_quarterly (
     Source_latitude REAL,
     Source_longitude REAL,
     Dest_latitude REAL,
-    Dest_longitude REAL
+    Dest_longitude REAL,
+    Source_country TEXT,
+    Dest_country TEXT
 );
 """
 
 query_insert_quarterly_data = """
-INSERT INTO route_delay_quarterly (RouteID, Source_latitude, Source_longitude, Dest_latitude, Dest_longitude, Year, Quarter, Average_Delay, Traffic_Count)
+INSERT INTO route_delay_quarterly (RouteID, Source_latitude, Source_longitude, Dest_latitude, Dest_longitude, Year, Quarter, Average_Delay, Traffic_Count, Source_country, Dest_country)
 SELECT 
     RouteID, 
     Source_latitude,
@@ -39,7 +41,9 @@ SELECT
         WHEN strftime('%m', Date) BETWEEN '10' AND '12' THEN 4
     END as Quarter,
     AVG(Delay) as Average_Delay,
-    COUNT(*) as Traffic_Count
+    COUNT(*) as Traffic_Count,
+    Source_country AS Source_country,
+    Dest_country AS Dest_country
 FROM route_delay
 GROUP BY RouteID, Year, Quarter;
 """

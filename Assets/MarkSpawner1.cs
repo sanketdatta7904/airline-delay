@@ -20,10 +20,10 @@ using System.Data.SQLite;
 public class MarkSpawner1 : MonoBehaviour
 {
 
-    public Material greenMaterial;
-    public Material redMaterial;
+    public Material Greencolor;
+    public Material Redcolor;
 
-    public Material yellowcolor;
+    public Material Yellowcolor;
 
     public GameObject lineRendererPrefab;
     public GameObject mark;
@@ -73,7 +73,7 @@ public class MarkSpawner1 : MonoBehaviour
     {
         updateLocation();
 
-        string dbPath = "URI=file:" + "D:/sqlite/aviation.db";
+        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -87,7 +87,7 @@ public class MarkSpawner1 : MonoBehaviour
         try
         {
             dbConnection.Open();
-            string query = "SELECT * FROM route_delay_quarterly LIMIT 5000";
+            string query = "SELECT * FROM route_delay_quarterly WHERE Source_country='Finland' AND Year = 2015";
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
@@ -191,7 +191,7 @@ public class MarkSpawner1 : MonoBehaviour
     {
 
         // GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
-        GameObject mark = markSmall;
+        // GameObject mark = markSmall;
         Vector3 sourcePos = GetPositionFromLatLon(Source_latitude, Source_longitude);
         Vector3 destPos = GetPositionFromLatLon(Dest_latitude, Dest_longitude);
 
@@ -246,7 +246,13 @@ public class MarkSpawner1 : MonoBehaviour
 
             lineRenderer.startWidth = lineRendererWidth;
             lineRenderer.endWidth = lineRendererWidth;
-            lineRenderer.material = greenMaterial;
+            if(avgDelay<5){
+            lineRenderer.material = Greencolor;
+            }else if(avgDelay>=5 && avgDelay<=25){
+                lineRenderer.material = Yellowcolor;
+            }else if(avgDelay>25){
+                lineRenderer.material = Redcolor;
+            }
             lineRendererEndpoints.Add(new LineRendererEndpoints
             {
                 LineRenderer = lineRenderer,

@@ -4,7 +4,7 @@ import sqlite3
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation.db' 
+sqlite_db_path = 'D:/sqlite/aviation_new.db' 
 
 
 
@@ -18,12 +18,14 @@ CREATE TABLE IF NOT EXISTS route_delay (
     Source_latitude REAL,
     Source_longitude REAL,
     Dest_latitude REAL,
-    Dest_longitude REAL
+    Dest_longitude REAL,
+    Source_country TEXT,
+    Dest_country TEXT
 );
 """
 
 query_alter_flights_data_table = """
-INSERT INTO route_delay (RouteID, Date, delay, Source_latitude, Source_longitude, Dest_latitude, Dest_longitude)
+INSERT INTO route_delay (RouteID, Date, delay, Source_latitude, Source_longitude, Dest_latitude, Dest_longitude, Source_country, Dest_country)
 SELECT 
     ADEP || '-' || ADES AS RouteID,
     SUBSTR("ACTUAL ARRIVAL TIME", 7, 4) || '-' || -- Year
@@ -33,7 +35,10 @@ SELECT
     "ADEP Latitude" AS Source_latitude,
     "ADEP Longitude" AS Source_longitude,
     "ADES Latitude" AS Dest_latitude,
-    "ADES Longitude" AS Dest_longitude
+    "ADES Longitude" AS Dest_longitude,
+    adep_country AS Source_country,
+    ades_country AS Dest_country
+    
 FROM flights_data;
 
 """
