@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 // using System.Data.SQLite;
 using UnityEngine.UI;
+using System.Diagnostics.Tracing;
+
 // import SQLite on windows platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 using System.Data.SQLite;
@@ -15,7 +17,7 @@ using System.Data.SQLite;
     using Mono.Data.Sqlite;
 #endif
 
-public class MarkSpawner : MonoBehaviour
+public class MarkSpawner1 : MonoBehaviour
 {
 
     public Material greenMaterial;
@@ -34,13 +36,14 @@ public class MarkSpawner : MonoBehaviour
     public GameObject map;
 
 
+    private double counter = 0;
     private double longitudeCenter;
     private double latitudeCenter;
     private double xOffSet = 0.0f;
     private double yOffSet = 0.0f;
 
     private float lineRendererWidth = 0.001f;
-    private float benzierCurve = 0.05f;
+    private float benzierCurve = 0.2f;
 
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
@@ -52,7 +55,19 @@ public class MarkSpawner : MonoBehaviour
         public GameObject StartMarker;
         public GameObject EndMarker;
     }
+
+    public class RouteData
+    {
+        public double SourceLatitude;
+        public double SourceLongitude;
+        public double DestLatitude;
+        public double DestLongitude;
+        public double AverageDelay;
+        public double TrafficCount;
+    }
+
     private List<LineRendererEndpoints> lineRendererEndpoints = new List<LineRendererEndpoints>();
+    private Dictionary<string, RouteData> routeDataMap = new Dictionary<string, RouteData>();
 
     void Start()
     {
@@ -72,31 +87,48 @@ public class MarkSpawner : MonoBehaviour
         try
         {
             dbConnection.Open();
-
-            // Query to select latitude and longitude from the aggregated_delays table
-            //string query = "SELECT * FROM aggregated_delays";
-            string query = "SELECT * FROM route_delay_quarterly LIMIT 200";
-
+            string query = "SELECT * FROM route_delay_quarterly LIMIT 5000";
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
             IDataReader reader = dbCommand.ExecuteReader();
             while (reader.Read())
             {
-                string RouteID = DBNull.Value.Equals(reader["RouteID"]) ? string.Empty : reader["RouteID"].ToString();
+                counter += 1;
+                string routeID = reader.IsDBNull(reader.GetOrdinal("RouteID")) ? string.Empty : reader.GetString(reader.GetOrdinal("RouteID"));
+                string[] airports = routeID.Split('-');
+                Array.Sort(airports);
+                string standardizedRouteID = string.Join("-", airports);
+                RouteData data = new RouteData
+                {
+                    SourceLatitude = reader.IsDBNull(reader.GetOrdinal("Source_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Source_latitude")),
+                    SourceLongitude = reader.IsDBNull(reader.GetOrdinal("Source_longitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Source_longitude")),
+                    DestLatitude = reader.IsDBNull(reader.GetOrdinal("Dest_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_latitude")),
+                    DestLongitude = reader.IsDBNull(reader.GetOrdinal("Dest_longitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_longitude")),
+                    AverageDelay = reader.IsDBNull(reader.GetOrdinal("Average_Delay")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Average_Delay")),
+                    TrafficCount = reader.IsDBNull(reader.GetOrdinal("Traffic_Count")) ? 0 : reader.GetDouble(reader.GetOrdinal("Traffic_Count"))
+                };
+                if(standardizedRouteID == "BIKF-CYQX"){
+                    Debug.Log("mdmdmdmdm");
+                }
+                
+                if (!routeDataMap.ContainsKey(standardizedRouteID))
+                {
+                    routeDataMap.Add(standardizedRouteID, data);
+                }
+                else
+                {
+                    var existingData = routeDataMap[standardizedRouteID];
+                    double oldTrafficCount = existingData.TrafficCount;
+                    double oldTotalDelay = existingData.AverageDelay * oldTrafficCount;
 
-                double Source_latitude = DBNull.Value.Equals(reader["Source_latitude"]) ? 0.0 : Convert.ToDouble(reader["Source_latitude"]);
-                double Source_longitude = DBNull.Value.Equals(reader["Source_longitude"]) ? 0.0 : Convert.ToDouble(reader["Source_longitude"]);
-                double Dest_latitude = DBNull.Value.Equals(reader["Dest_latitude"]) ? 0.0 : Convert.ToDouble(reader["Dest_latitude"]);
-                double Dest_longitude = DBNull.Value.Equals(reader["Dest_longitude"]) ? 0.0 : Convert.ToDouble(reader["Dest_longitude"]);
-                double avgDelay = DBNull.Value.Equals(reader["Average_Delay"]) ? 0.0 : Convert.ToDouble(reader["Average_Delay"]);
+                    existingData.TrafficCount += data.TrafficCount;
 
+                    double newTotalDelay = oldTotalDelay + data.AverageDelay * data.TrafficCount;
+                    existingData.AverageDelay = newTotalDelay / existingData.TrafficCount;
 
-
-                string sizeString = avgDelay > 10 ? "large" : avgDelay > 0 ? "medium" : "small";
-
-
-                SpawnMarkAtLatLong(RouteID, Source_latitude, Source_longitude, Dest_latitude, Dest_longitude, avgDelay, sizeString);
+                    routeDataMap[standardizedRouteID] = existingData;
+                }
             }
         }
         catch (Exception e)
@@ -108,10 +140,42 @@ public class MarkSpawner : MonoBehaviour
             if (dbConnection.State == ConnectionState.Open)
                 dbConnection.Close();
         }
+        // AnalyzeAverageDelays();
+        Debug.Log("debugging counter");
+        Debug.Log(counter);
+        foreach (var route in routeDataMap)
+        {
+            Debug.Log(route);
+            SpawnMarkAtLatLong(route.Key, route.Value.SourceLatitude, route.Value.SourceLongitude, route.Value.DestLatitude, route.Value.DestLongitude, route.Value.AverageDelay, route.Value.TrafficCount);
+        }
     }
 
 
+    void AnalyzeAverageDelays()
+    {
+        int rangeIncrement = 5;
+        Dictionary<string, int> delayHistogram = new Dictionary<string, int>();
 
+        foreach (var route in routeDataMap.Values)
+        {
+            int rangeIndex = (int)(route.AverageDelay / rangeIncrement);
+            string rangeKey = $"{rangeIndex * rangeIncrement}-{(rangeIndex + 1) * rangeIncrement}";
+
+            if (!delayHistogram.ContainsKey(rangeKey))
+            {
+                delayHistogram[rangeKey] = 1;
+            }
+            else
+            {
+                delayHistogram[rangeKey]++;
+            }
+        }
+
+        foreach (var range in delayHistogram)
+        {
+            Debug.Log($"Average Delay {range.Key}: Count = {range.Value}");
+        }
+    }
     private void updateLocation()
     {
         mapZoom = map.GetComponent<MapRenderer>().ZoomLevel;
@@ -123,21 +187,11 @@ public class MarkSpawner : MonoBehaviour
         parent.transform.position = new Vector3((float)-xOffSet, (float)-yOffSet, 0.0f);
     }
 
-    /**
-     * Spawn a mark at the given latitude and longitude
-     * Each mark represents an airport and has a name, code and size
-     * @param latitude - the latitude of the airport
-     * @param longitude - the longitude of the airport
-     * @param airportName - the name of the airport
-     * @param airportCode - the code of the airport
-     * @param size - the size of the airport (small, medium, large)
-     * @param airportType - 
-     */
-    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, string sizeString)
+    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, double trafficCount)
     {
 
         // GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
-        GameObject mark = markMedium;
+        GameObject mark = markSmall;
         Vector3 sourcePos = GetPositionFromLatLon(Source_latitude, Source_longitude);
         Vector3 destPos = GetPositionFromLatLon(Dest_latitude, Dest_longitude);
 
@@ -171,8 +225,16 @@ public class MarkSpawner : MonoBehaviour
 
         GameObject lineRendererObj = Instantiate(lineRendererPrefab, Vector3.zero, Quaternion.identity);
 
+        LineScript lineScript = lineRendererObj.AddComponent<LineScript>();
+        lineScript.routeID = RouteID;
+        lineScript.averageDelay = avgDelay;
+        lineScript.trafficCount = trafficCount; // Ensure trafficCount is cast to int if necessary
+
+
+    Debug.Log($"Line created with RouteID: {lineScript.routeID}, AvgDelay: {lineScript.averageDelay}, TrafficCount: {lineScript.trafficCount}");
 
         LineRenderer lineRenderer = lineRendererObj.GetComponent<LineRenderer>();
+
         if (lineRenderer != null)
         {
             int curveSegments = 20;
@@ -184,18 +246,7 @@ public class MarkSpawner : MonoBehaviour
 
             lineRenderer.startWidth = lineRendererWidth;
             lineRenderer.endWidth = lineRendererWidth;
-            if (sizeString == "large")
-            {
-                lineRenderer.material = redMaterial;
-            }
-            else if (sizeString == "medium")
-            {
-                lineRenderer.material = yellowcolor;
-            }
-            else
-            {
-                lineRenderer.material = greenMaterial;
-            }
+            lineRenderer.material = greenMaterial;
             lineRendererEndpoints.Add(new LineRendererEndpoints
             {
                 LineRenderer = lineRenderer,
@@ -231,7 +282,6 @@ public class MarkSpawner : MonoBehaviour
 
         if (zoomChanged)
         {
-            // iterate over the points kd tree and redraw the points with the new zoom
             foreach (PointScript point in allPointsKd)
             {
                 point.Redraw(mapZoom);
