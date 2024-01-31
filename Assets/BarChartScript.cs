@@ -13,8 +13,8 @@ public class BarChartScript : MonoBehaviour
 {
     public RectTransform barPrefab;
     public RectTransform chartContainer;
-    public float barWidth = 20f;
-    public float spacing = 10f;
+    public float barWidth = 10f;
+    public float spacing = 1f;
     private float[] data; // Change from public to private
 
 void Start()
@@ -75,7 +75,6 @@ void FetchAvgDelayData()
 }
 
 
-
 void CreateBars()
 {
     // Clear existing bars
@@ -86,7 +85,7 @@ void CreateBars()
 
     if (barPrefab == null || chartContainer == null)
     {
-        Debug.LogError("Please assign the barPrefab and chartContainer in the inspector.");
+        Debug.LogError("assign barPrefab and chartContainer");
         return;
     }
 
@@ -106,13 +105,18 @@ void CreateBars()
         GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
         textLabel.transform.SetParent(chartContainer);
         textLabel.transform.localScale = Vector3.one;
-        textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f, -20f);
+        // textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f, -20f);
 
         Text labelText = textLabel.AddComponent<Text>();
         labelText.text = Mathf.RoundToInt(data[i]).ToString();
+
+  
+        textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, -20f);
+
+
         labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
         labelText.alignment = TextAnchor.MiddleCenter;
-        labelText.color = Color.black;
+        labelText.color = Color.white;
 
         // Set the sibling index of the text label higher than the bar to ensure it renders above the bar
         textLabel.transform.SetSiblingIndex(barInstance.transform.GetSiblingIndex() + 1);
@@ -134,7 +138,6 @@ void CreateBars()
         }
     }
 }
-
 
 
 public void UpdateData(float[] newData)

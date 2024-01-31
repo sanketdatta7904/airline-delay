@@ -5,9 +5,11 @@ public class AxisDrawer : MonoBehaviour
 {
     public RectTransform xAxis;
     public RectTransform yAxis;
-    public float axisLengthX = 300f; // Set the desired length for X-axis
+    public float axisLengthX = 200f; // Set the desired length for X-axis
     public float axisLengthY = 135f; // Set the desired length for Y-axis
-    public float axisThickness = 2f; // Set the desired thickness for axes
+    public float axisThickness = 1.0f; // Set the desired thickness for axes
+
+
 
     void Start()
     {
@@ -32,13 +34,20 @@ public class AxisDrawer : MonoBehaviour
         DrawLine(yAxis, new Vector2(0f, 0f), new Vector2(0f, axisLengthY), axisThickness);
     }
 
+
+
+
     void DrawLine(RectTransform line, Vector2 startPos, Vector2 endPos, float thickness)
     {
         Image lineImage = line.GetComponent<Image>();
         if (lineImage == null)
         {
             lineImage = line.gameObject.AddComponent<Image>();
-            lineImage.color = Color.black; // Set the color of the axis lines
+            lineImage.color = Color.grey; // Set the color of the axis lines to grey
+        }
+        else
+        {
+            lineImage.color = Color.grey; // Update the color if the Image component already exists
         }
 
         line.sizeDelta = new Vector2(Vector2.Distance(startPos, endPos), thickness);

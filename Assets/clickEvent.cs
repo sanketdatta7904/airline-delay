@@ -4,35 +4,31 @@ using UnityEngine;
 
 public class clickEvent : MonoBehaviour
 {
-    // Reference to the BarChartScript
-    public BarChartScript barChart;
-
-    // ...
-
-    private void OnMouseDown()
+    void OnMouseDown()
     {
         Debug.Log("Mouse down");
         Vector3 mousePos = Input.mousePosition;
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
 
-        // Get the closest object
         PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
+
         float distance = Vector3.Distance(nearestObj.transform.position, worldPos);
+
         string message = "Airport Name: " + nearestObj.airportName + "\n" +
                          "Airport Code: " + nearestObj.airportCode + "\n" +
                          "Average Delay: " + nearestObj.avgDelay + "\n" +
                          "Distance: " + distance + "\n" +
                          "Type: " + nearestObj.airportType;
+
         Debug.Log(distance);
 
         if (distance < 1.0005)
         {
-            // Set and show tooltip
+            // Show tooltip
             TooltipManager._instance.SetAndShowTooltip(message);
 
-            // Update the bar chart with the average delay data of the selected airport
-            float[] newData = { (float)nearestObj.avgDelay }; // Explicit cast from double to float
-            barChart.UpdateData(newData);
+            // Update chart data
+            UpdateChart(nearestObj.avgDelay);
         }
         else
         {
@@ -40,4 +36,17 @@ public class clickEvent : MonoBehaviour
             TooltipManager._instance.HideTooltip();
         }
     }
+
+void UpdateChart(double avgDelay)
+{
+    // Access the BarChartScript and update its data
+    BarChartScript barChart = FindObjectOfType<BarChartScript>();
+    if (barChart != null)
+    {
+        // Convert avgDelay to float and update chart with the selected airport's average delay
+        float[] newData = new float[] { (float)avgDelay /* add other data points as needed */ };
+        barChart.UpdateData(newData);
+    }
+}
+
 }
