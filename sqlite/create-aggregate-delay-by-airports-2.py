@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS aggregated_delays (
     airport_code TEXT,
     airport_name TEXT,
     ades_type TEXT,
+    ades_type TEXT,
     latitude REAL,
     longitude REAL,
     avg_delay REAL,
