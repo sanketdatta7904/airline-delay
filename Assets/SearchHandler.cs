@@ -27,5 +27,9 @@ public class SearchHandler : MonoBehaviour
             var mapRenderer = GetComponent<MapRenderer>();
             mapRenderer.SetMapScene(new MapSceneOfLocationAndZoomLevel(location.Point, 6), MapSceneAnimationKind.Bow, 5.0f);
         }
+        for (int i = 0; i < result.Locations.Count; i++)
+        {
+            Debug.Log(result.Locations[i].Address.FormattedAddress);
+        }
     }
 }
