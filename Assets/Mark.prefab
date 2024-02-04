@@ -97,3 +97,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274c5eb5683830b42ba3cf550e24861f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  latitude: 0
+  longitude: 0
+  airportName: 
+  airportCode: 
+  size: 
+  avgDelay: 0
+  hidePointsOffMap: 1
+  airportType: 

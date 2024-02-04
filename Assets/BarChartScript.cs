@@ -16,6 +16,8 @@ public class BarChartScript : MonoBehaviour
     public float barWidth = 10f;
     public float spacing = 1f;
     private float[] data; // Change from public to private
+     public Text chartTitle;
+     
 
 void Start()
 {
@@ -134,15 +136,29 @@ void CreateBars()
         if (barImage != null)
         {
             // Set the color or other properties of the bar
-            // Example: barImage.color = Color.blue;
+            // barImage.color = Color.blue;
         }
     }
 }
 
+
+    public void UpdateChartTitle(string title)
+    {
+        if (chartTitle != null)
+        {
+            chartTitle.text = title;
+        }
+    }
+// public void UpdateData(float[] newData)
+// {
+//     data = newData;
+//     CreateBars();
+// }
 
 public void UpdateData(float[] newData)
 {
     data = newData;
     CreateBars();
 }
+
 }

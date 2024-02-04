@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/xCharts.unity
-    guid: 67343da6f8b064baeba24472e1bccf53
+    path: Assets/Scenes/2D_map.unity
+    guid: 45ddb7a4859f1c245b16ed82dd0510d7
   m_configObjects: {}

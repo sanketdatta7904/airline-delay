@@ -1,6 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Data;
+
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+using System.Data.SQLite;
+#endif
+
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+using Mono.Data.Sqlite;
+#endif
 
 public class clickEvent : MonoBehaviour
 {
@@ -27,26 +37,136 @@ public class clickEvent : MonoBehaviour
             // Show tooltip
             TooltipManager._instance.SetAndShowTooltip(message);
 
-            // Update chart data
-            UpdateChart(nearestObj.avgDelay);
+            // Update chart data for the selected mark
+            UpdateChart(nearestObj.airportCode);
         }
         else
         {
             // Hide tooltip
             TooltipManager._instance.HideTooltip();
+
+            // Update chart data for the top 5 delays
+            UpdateTop5Delays();
         }
     }
 
-void UpdateChart(double avgDelay)
-{
-    // Access the BarChartScript and update its data
-    BarChartScript barChart = FindObjectOfType<BarChartScript>();
-    if (barChart != null)
+    void UpdateChart(string airportCode)
     {
-        // Convert avgDelay to float and update chart with the selected airport's average delay
-        float[] newData = new float[] { (float)avgDelay /* add other data points as needed */ };
-        barChart.UpdateData(newData);
-    }
-}
+        // Access the BarChartScript and update its data
+        BarChartScript barChart = FindObjectOfType<BarChartScript>();
+        if (barChart != null)
+        {
+            // Query avg_delay for each year from airport_year_aggregated_delays using airportCode
+            float[] newData = new float[5];
 
+            for (int year = 2017; year <= 2021; year++)
+            {
+                double avgDelay = FetchAvgDelayFromYearAggregatedDelays(airportCode, year);
+                newData[year - 2017] = (float)avgDelay;
+            }
+
+            // Update chart with the selected airport's average delays for each year
+            barChart.UpdateData(newData);
+
+                        // Update chart title
+            string chartTitle = airportCode + " " + "Average Delay by year";
+            barChart.UpdateChartTitle(chartTitle);
+        }
+    }
+
+    void UpdateTop5Delays()
+    {
+        // Access the BarChartScript and update its data with the top 5 delays
+        BarChartScript barChart = FindObjectOfType<BarChartScript>();
+        if (barChart != null)
+        {
+            // Query top 5 delays from aggregated_delays table
+            float[] newData = FetchTop5Delays();
+            
+            // Update chart with the top 5 delays
+            barChart.UpdateData(newData);
+        }
+    }
+
+    double FetchAvgDelayFromYearAggregatedDelays(string airportCode, int year)
+    {
+        double avgDelay = 0.0;
+
+        // Use the same database connection code as in your MarkSpawner script
+        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        using (IDbConnection dbConnection = new System.Data.SQLite.SQLiteConnection(dbPath))
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        using (IDbConnection dbConnection = new Mono.Data.Sqlite.SqliteConnection(dbPath))
+#endif
+        {
+            try
+            {
+                dbConnection.Open();
+                string query = $"SELECT AVG(avg_delay) FROM airport_year_aggregated_delays WHERE airport_code = '{airportCode}' AND year = {year}";
+                IDbCommand dbCommand = dbConnection.CreateCommand();
+                dbCommand.CommandText = query;
+
+                object result = dbCommand.ExecuteScalar();
+
+                if (result != null && result != DBNull.Value)
+                {
+                    avgDelay = Convert.ToDouble(result);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error executing query: {e.Message}");
+            }
+            finally
+            {
+                if (dbConnection.State == ConnectionState.Open)
+                    dbConnection.Close();
+            }
+        }
+
+        return avgDelay;
+    }
+
+    float[] FetchTop5Delays()
+    {
+        float[] top5Delays = new float[5];
+
+        // Use the same database connection code as in your MarkSpawner script
+        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        using (IDbConnection dbConnection = new System.Data.SQLite.SQLiteConnection(dbPath))
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        using (IDbConnection dbConnection = new Mono.Data.Sqlite.SqliteConnection(dbPath))
+#endif
+        {
+            try
+            {
+                dbConnection.Open();
+                string query = "SELECT avg_delay FROM aggregated_delays ORDER BY avg_delay DESC LIMIT 5";
+                IDbCommand dbCommand = dbConnection.CreateCommand();
+                dbCommand.CommandText = query;
+
+                IDataReader reader = dbCommand.ExecuteReader();
+
+                int index = 0;
+                while (reader.Read() && index < 5)
+                {
+                    object avgDelayObject = reader["avg_delay"];
+                    top5Delays[index++] = (avgDelayObject != DBNull.Value) ? Convert.ToSingle(avgDelayObject) : 0f;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error executing query: {e.Message}");
+            }
+            finally
+            {
+                if (dbConnection.State == ConnectionState.Open)
+                    dbConnection.Close();
+            }
+        }
+
+        return top5Delays;
+    }
 }

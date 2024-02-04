@@ -4,9 +4,8 @@ using UnityEngine.UI;
 
 public class SceneChanger : MonoBehaviour
 {
-    // Attach this script to your button
 
-    public string sceneToLoad; // Set the scene name in the Unity Editor
+    public string sceneToLoad; 
 
     private void Start()
     {
