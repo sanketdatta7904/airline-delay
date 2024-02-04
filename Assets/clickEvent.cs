@@ -14,49 +14,55 @@ using Mono.Data.Sqlite;
 
 public class clickEvent : MonoBehaviour
 {
-    void OnMouseDown()
+
+
+void OnMouseDown()
+{
+    Debug.Log("Mouse down");
+    Vector3 mousePos = Input.mousePosition;
+    Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+
+    PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
+
+    float distance = Vector3.Distance(nearestObj.transform.position, worldPos);
+
+    string message = "Airport Name: " + nearestObj.airportName + "\n" +
+                     "Airport Code: " + nearestObj.airportCode + "\n" +
+                     "Average Delay: " + nearestObj.avgDelay + "\n" +
+                     "Distance: " + distance + "\n" +
+                     "Type: " + nearestObj.airportType;
+
+    Debug.Log(distance);
+
+    BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
+
+    if (distance < 1.0005)
     {
-        Debug.Log("Mouse down");
-        Vector3 mousePos = Input.mousePosition;
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        // Show tooltip
+        TooltipManager._instance.SetAndShowTooltip(message);
 
-        PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
+        // Update chart data for the selected mark
+        UpdateChart(nearestObj, barChart);
 
-        float distance = Vector3.Distance(nearestObj.transform.position, worldPos);
-
-        string message = "Airport Name: " + nearestObj.airportName + "\n" +
-                         "Airport Code: " + nearestObj.airportCode + "\n" +
-                         "Average Delay: " + nearestObj.avgDelay + "\n" +
-                         "Distance: " + distance + "\n" +
-                         "Type: " + nearestObj.airportType;
-
-        Debug.Log(distance);
-
-        BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
-
-        if (distance < 1.0005)
-        {
-            // Show tooltip
-            TooltipManager._instance.SetAndShowTooltip(message);
-
-            // Update chart data for the selected mark
-            UpdateChart(nearestObj, barChart);
-        }
-        else
-        {
-            // Hide tooltip
-            TooltipManager._instance.HideTooltip();
-
-            // Update chart data for the top 5 delays
-            UpdateTop5Delays(barChart);
-
-            // Hide subtitle
-            HideSubtitle(barChart);
-
-            // Update chart title to "Top-5 Delay-Prone Airports"
-            UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
-        }
+        // Show subtitle
+        barChart.ShowSubtitle();
     }
+    else
+    {
+        // Hide tooltip
+        TooltipManager._instance.HideTooltip();
+
+        // Hide subtitle
+        barChart.HideSubtitle();
+
+        // Update chart data for the top 5 delays
+        UpdateTop5Delays(barChart);
+
+        // Update chart title to "Top-5 Delay-Prone Airports"
+        UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
+    }
+}
+
 
     void UpdateChart(PointScript nearestObj, BarChartScript barChart)
     {
@@ -76,11 +82,11 @@ public class clickEvent : MonoBehaviour
             barChart.UpdateData(newData);
 
             // Update chart title
-            string chartTitle = nearestObj.airportCode + " " + "Average Delay by year";
+            string chartTitle =  "Average Delay Per Year";
             barChart.UpdateChartTitle(chartTitle);
 
             // Update subtitle with airport name
-            string subtitle = "Airport: " + nearestObj.airportName;
+            string subtitle = nearestObj.airportName;
             barChart.UpdateSubtitle(subtitle);
         }
     }

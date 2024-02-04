@@ -172,11 +172,27 @@ public void UpdateData(float[] newData)
     CreateBars();
 }
 
+// public void HideSubtitle()
+// {
+//     if (chartSubtitle != null)
+//     {
+//         chartSubtitle.gameObject.SetActive(false);
+//     }
+// }
+
 public void HideSubtitle()
 {
     if (chartSubtitle != null)
     {
         chartSubtitle.gameObject.SetActive(false);
+    }
+}
+
+public void ShowSubtitle()
+{
+    if (chartSubtitle != null)
+    {
+        chartSubtitle.gameObject.SetActive(true);
     }
 }
 
