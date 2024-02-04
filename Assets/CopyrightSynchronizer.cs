@@ -31,7 +31,6 @@ public class CopyrightSynchronizer : MonoBehaviour
 
         if (_defaultTextureTileLayer != null)
         {
-            Debug.Log("DefaultTextureTileLayer is not null");
             var imageryType = _defaultTextureTileLayer.ImageryType;
             if (imageryType == MapImageryType.Aerial)
             {
@@ -43,10 +42,6 @@ public class CopyrightSynchronizer : MonoBehaviour
                 _textMeshPro.fontSharedMaterial.SetColor(ShaderUtilities.ID_FaceColor, Color.black);
                 _textMeshPro.fontSharedMaterial.SetColor(ShaderUtilities.ID_OutlineColor, Color.white);
             }
-        }
-        else
-        {
-            Debug.Log("DefaultTextureTileLayer is null");
         }
     }
 }
