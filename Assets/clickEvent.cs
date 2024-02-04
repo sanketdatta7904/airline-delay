@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using System.Data;
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -32,13 +32,15 @@ public class clickEvent : MonoBehaviour
 
         Debug.Log(distance);
 
+        BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
+
         if (distance < 1.0005)
         {
             // Show tooltip
             TooltipManager._instance.SetAndShowTooltip(message);
 
             // Update chart data for the selected mark
-            UpdateChart(nearestObj.airportCode);
+            UpdateChart(nearestObj.airportCode, barChart);
         }
         else
         {
@@ -46,14 +48,16 @@ public class clickEvent : MonoBehaviour
             TooltipManager._instance.HideTooltip();
 
             // Update chart data for the top 5 delays
-            UpdateTop5Delays();
+            UpdateTop5Delays(barChart);
+
+            // Update chart title to "Top-5 Delay-Prone Airports"
+            UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
         }
     }
 
-    void UpdateChart(string airportCode)
+    void UpdateChart(string airportCode, BarChartScript barChart)
     {
         // Access the BarChartScript and update its data
-        BarChartScript barChart = FindObjectOfType<BarChartScript>();
         if (barChart != null)
         {
             // Query avg_delay for each year from airport_year_aggregated_delays using airportCode
@@ -68,23 +72,30 @@ public class clickEvent : MonoBehaviour
             // Update chart with the selected airport's average delays for each year
             barChart.UpdateData(newData);
 
-                        // Update chart title
+            // Update chart title
             string chartTitle = airportCode + " " + "Average Delay by year";
             barChart.UpdateChartTitle(chartTitle);
         }
     }
 
-    void UpdateTop5Delays()
+    void UpdateTop5Delays(BarChartScript barChart)
     {
         // Access the BarChartScript and update its data with the top 5 delays
-        BarChartScript barChart = FindObjectOfType<BarChartScript>();
         if (barChart != null)
         {
             // Query top 5 delays from aggregated_delays table
             float[] newData = FetchTop5Delays();
-            
+
             // Update chart with the top 5 delays
             barChart.UpdateData(newData);
+        }
+    }
+
+    void UpdateChartTitle(string title, BarChartScript barChart)
+    {
+        if (barChart != null)
+        {
+            barChart.UpdateChartTitle(title);
         }
     }
 
