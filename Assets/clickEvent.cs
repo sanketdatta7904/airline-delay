@@ -40,7 +40,7 @@ public class clickEvent : MonoBehaviour
             TooltipManager._instance.SetAndShowTooltip(message);
 
             // Update chart data for the selected mark
-            UpdateChart(nearestObj.airportCode, barChart);
+            UpdateChart(nearestObj, barChart);
         }
         else
         {
@@ -50,12 +50,15 @@ public class clickEvent : MonoBehaviour
             // Update chart data for the top 5 delays
             UpdateTop5Delays(barChart);
 
+            // Hide subtitle
+            HideSubtitle(barChart);
+
             // Update chart title to "Top-5 Delay-Prone Airports"
             UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
         }
     }
 
-    void UpdateChart(string airportCode, BarChartScript barChart)
+    void UpdateChart(PointScript nearestObj, BarChartScript barChart)
     {
         // Access the BarChartScript and update its data
         if (barChart != null)
@@ -65,7 +68,7 @@ public class clickEvent : MonoBehaviour
 
             for (int year = 2017; year <= 2021; year++)
             {
-                double avgDelay = FetchAvgDelayFromYearAggregatedDelays(airportCode, year);
+                double avgDelay = FetchAvgDelayFromYearAggregatedDelays(nearestObj.airportCode, year);
                 newData[year - 2017] = (float)avgDelay;
             }
 
@@ -73,8 +76,12 @@ public class clickEvent : MonoBehaviour
             barChart.UpdateData(newData);
 
             // Update chart title
-            string chartTitle = airportCode + " " + "Average Delay by year";
+            string chartTitle = nearestObj.airportCode + " " + "Average Delay by year";
             barChart.UpdateChartTitle(chartTitle);
+
+            // Update subtitle with airport name
+            string subtitle = "Airport: " + nearestObj.airportName;
+            barChart.UpdateSubtitle(subtitle);
         }
     }
 
@@ -96,6 +103,14 @@ public class clickEvent : MonoBehaviour
         if (barChart != null)
         {
             barChart.UpdateChartTitle(title);
+        }
+    }
+
+    void HideSubtitle(BarChartScript barChart)
+    {
+        if (barChart != null)
+        {
+            barChart.HideSubtitle();
         }
     }
 

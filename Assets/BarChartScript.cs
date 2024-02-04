@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Data;
+using System.Collections.Generic;
+
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
     using System.Data.SQLite;
 #endif
@@ -17,6 +19,10 @@ public class BarChartScript : MonoBehaviour
     public float spacing = 1f;
     private float[] data; // Change from public to private
      public Text chartTitle;
+
+     private string[] airportNames;
+
+       public Text chartSubtitle; // 
      
 
 void Start()
@@ -28,42 +34,40 @@ void Start()
 
 void FetchAvgDelayData()
 {
-    // Use the same database connection code as in your MarkSpawner script
     string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+    IDbConnection dbConnection = null;
+
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-    IDbConnection dbConnection = new SQLiteConnection(dbPath);
+    dbConnection = new System.Data.SQLite.SQLiteConnection(dbPath);
 #endif
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-    IDbConnection dbConnection = new SqliteConnection(dbPath);
+    dbConnection = new Mono.Data.Sqlite.SqliteConnection(dbPath);
 #endif
 
     try
     {
         dbConnection.Open();
-        string query = "SELECT avg_delay FROM aggregated_delays ORDER BY avg_delay DESC LIMIT 5";
+        string query = "SELECT airport_name, avg_delay FROM aggregated_delays ORDER BY avg_delay DESC LIMIT 5";
         IDbCommand dbCommand = dbConnection.CreateCommand();
         dbCommand.CommandText = query;
 
         IDataReader reader = dbCommand.ExecuteReader();
 
-        // Initialize the data array with the avg_delay values from the SQL table
-        int rowCount = 0;
-        while (reader.Read())
-        {
-            rowCount++;
-        }
+        // Initialize the data and airportNames arrays with the avg_delay and airport_name values from the SQL table
+        List<float> dataList = new List<float>();
+        List<string> airportNamesList = new List<string>();
 
-        data = new float[rowCount];
-        reader.Close();
-
-        // Read the avg_delay values into the data array, handling DBNull
-        reader = dbCommand.ExecuteReader();
-        int index = 0;
         while (reader.Read())
         {
             object avgDelayObject = reader["avg_delay"];
-            data[index++] = (avgDelayObject != DBNull.Value) ? Convert.ToSingle(avgDelayObject) : 0f;
+            dataList.Add((avgDelayObject != DBNull.Value) ? Convert.ToSingle(avgDelayObject) : 0f);
+
+            object airportNameObject = reader["airport_name"];
+            airportNamesList.Add((airportNameObject != DBNull.Value) ? Convert.ToString(airportNameObject) : "");
         }
+
+        data = dataList.ToArray();
+        airportNames = airportNamesList.ToArray();
     }
     catch (Exception e)
     {
@@ -71,10 +75,11 @@ void FetchAvgDelayData()
     }
     finally
     {
-        if (dbConnection.State == ConnectionState.Open)
+        if (dbConnection != null && dbConnection.State == ConnectionState.Open)
             dbConnection.Close();
     }
 }
+
 
 
 void CreateBars()
@@ -147,18 +152,32 @@ void CreateBars()
         if (chartTitle != null)
         {
             chartTitle.text = title;
+                       chartTitle.fontStyle = FontStyle.Bold;
         }
     }
-// public void UpdateData(float[] newData)
-// {
-//     data = newData;
-//     CreateBars();
-// }
+
+    public void UpdateSubtitle(string subtitle)
+    {
+        if (chartSubtitle != null)
+        {
+            chartSubtitle.text = subtitle;
+              chartSubtitle.fontSize = 12;
+              
+        }
+    }
 
 public void UpdateData(float[] newData)
 {
     data = newData;
     CreateBars();
+}
+
+public void HideSubtitle()
+{
+    if (chartSubtitle != null)
+    {
+        chartSubtitle.gameObject.SetActive(false);
+    }
 }
 
 }
