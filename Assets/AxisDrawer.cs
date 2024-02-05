@@ -28,7 +28,75 @@ public class AxisDrawer : MonoBehaviour
         // Add arrowhead at the specific point (X = 0, Y = 146)
         Vector2 specificPoint = new Vector2(0f, 146f);
         // AddArrowhead(xAxis, specificPoint, Quaternion.Euler(0f, 0f, 0f));
+
+
+
+        DrawAxisWithLabels();
     }
+
+    
+    
+ void DrawAxisWithLabels()
+    {
+        DrawAxis(); // Draw the axes
+
+        // Add arrowhead at the specific point (X = 0, Y = 146)
+        Vector2 specificPoint = new Vector2(0f, 146f);
+        // AddArrowhead(xAxis, specificPoint, Quaternion.Euler(0f, 0f, 0f));
+
+        // Add vertical text to the Y-axis
+        AddTextToAxis(yAxis, "minutes", TextAnchor.UpperCenter);
+    }
+
+    void AddTextToAxis(RectTransform axis, string labelText, TextAnchor alignment)
+{
+    GameObject textObject = new GameObject("AxisLabel");
+    RectTransform textRect = textObject.AddComponent<RectTransform>();
+    Text textComponent = textObject.AddComponent<Text>();
+
+    textComponent.text = labelText;
+
+    // Load the font from the system fonts
+    Font defaultFont = Font.CreateDynamicFontFromOSFont("Arial", 12); // You may need to adjust the font size
+    if (defaultFont != null)
+    {
+        textComponent.font = defaultFont;
+    }
+    else
+    {
+        Debug.LogError("Failed to load default system font.");
+        Destroy(textObject);
+        return;
+    }
+
+    textComponent.fontSize = 12;
+    textComponent.alignment = alignment;
+
+    // Set the color of the text to black
+    textComponent.color = Color.black;
+
+    // Adjust the position calculation for the text
+    textRect.anchoredPosition = new Vector2(30f, axisLengthY / 2f); // Shift by 30 pixels to the right
+
+    if (axis != null && axis.parent != null)
+    {
+        textRect.SetParent(axis.parent, false);
+    }
+    else
+    {
+        Debug.LogError("Axis is null or missing parent.");
+        Destroy(textObject);
+        return;
+    }
+
+    // Set the rotation to make the text vertical
+    textRect.localRotation = Quaternion.Euler(0f, 0f, 90f);
+}
+
+
+
+    
+
 void DrawAxis()
 {
     // Draw the positive side of the X and Y axes
