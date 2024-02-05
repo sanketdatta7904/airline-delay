@@ -124,42 +124,45 @@ void Start()
         parent.transform.position = new Vector3((float)-xOffSet, (float)-yOffSet, 0.0f);
     }
 
-    public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size, double avgDelay, string airportType)
+public void SpawnMarkAtLatLong(double latitude, double longitude, string airportName, string airportCode, string size, double avgDelay, string airportType)
+{
+    float x = (float)CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
+    float y = (float)CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
+    float sizeScale = size == "large" ? 0.01f : size == "medium" ? 0.008f : size == "small" ? 0.006f : 0.004f;
+    UnityEngine.Color color = avgDelay > 50 ? Color.red : avgDelay > 10 ? Color.yellow : Color.green;
+
+    GameObject markInstance = Instantiate(markLarge, Vector3.zero, Quaternion.identity);
+    markInstance.transform.parent = parent.transform;
+    markInstance.GetComponent<PointScript>().latitude = latitude;
+    markInstance.GetComponent<PointScript>().longitude = longitude;
+    markInstance.GetComponent<PointScript>().airportName = airportName;
+    markInstance.GetComponent<PointScript>().airportCode = airportCode;
+    markInstance.GetComponent<PointScript>().countryName = countryName;
+    markInstance.GetComponent<PointScript>().size = size;
+    markInstance.GetComponent<PointScript>().airportType = airportType;
+    markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
+    markInstance.GetComponent<PointScript>().Redraw(mapZoom);
+
+    if (!string.IsNullOrEmpty(selectedAirportName) && airportName.Equals(selectedAirportName, StringComparison.OrdinalIgnoreCase))
     {
-        float x = (float)CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
-        float y = (float)CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
-        float sizeScale = size == "large" ? 0.01f : size == "medium" ? 0.008f : size == "small" ? 0.006f : 0.004f;
-        UnityEngine.Color color = avgDelay > 50 ? Color.red : avgDelay > 10 ? Color.yellow : Color.green;
-
-        GameObject markInstance = Instantiate(markLarge, Vector3.zero, Quaternion.identity);
-        markInstance.transform.parent = parent.transform;
-        markInstance.GetComponent<PointScript>().latitude = latitude;
-        markInstance.GetComponent<PointScript>().longitude = longitude;
-        markInstance.GetComponent<PointScript>().airportName = airportName;
-        markInstance.GetComponent<PointScript>().airportCode = airportCode;
-        markInstance.GetComponent<PointScript>().countryName = countryName;
-        markInstance.GetComponent<PointScript>().size = size;
-        markInstance.GetComponent<PointScript>().airportType = airportType;
-        markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
-        markInstance.GetComponent<PointScript>().Redraw(mapZoom);
-
-        if (!string.IsNullOrEmpty(selectedAirportName) && airportName.Equals(selectedAirportName, StringComparison.OrdinalIgnoreCase))
-        {
-            sizeScale *= 75f;
-            markInstance.GetComponent<SpriteRenderer>().color = Color.black;
-        }
-        else
-        {
-            markInstance.GetComponent<SpriteRenderer>().color = color;
-        }
-
-        markInstance.transform.localScale = new Vector3(sizeScale, sizeScale, sizeScale);
-
-        allPointsKd.Add(markInstance.GetComponent<PointScript>());
-
-        markInstance.SetActive(selectedAirportType == "All" || airportType == selectedAirportType);
-        markInstance.SetActive(selectedAvgDelay == 1f || avgDelay >= selectedAvgDelay && avgDelay <= 10f);
+        sizeScale *= 75f;
+        markInstance.GetComponent<SpriteRenderer>().color = Color.black;
     }
+    else
+    {
+        markInstance.GetComponent<SpriteRenderer>().color = color;
+    }
+
+    markInstance.transform.localScale = new Vector3(sizeScale, sizeScale, sizeScale);
+
+    bool shouldShow = (selectedAirportType == "All" || airportType == selectedAirportType) &&
+                      (selectedAvgDelay == 1f || avgDelay >= selectedAvgDelay && avgDelay <= 10f);
+
+    markInstance.SetActive(shouldShow);
+
+    allPointsKd.Add(markInstance.GetComponent<PointScript>());
+}
+
 
     public static void SetSelectedAirportType(string airportType)
     {
@@ -211,23 +214,54 @@ public static void FilterAirportsByAvgDelay(float avgDelay)
             point.transform.localScale = new Vector3(sizeScale, sizeScale, sizeScale);
         }
     }
-
-    // Method to handle changes in the country search input field
 private void OnCountrySearchInputChange(string value)
 {
-    // Update the class-level variable instead of declaring a new local variable
     selectedCountryName = value;
 
     foreach (PointScript point in allPointsKd)
     {
+        // Declare pointAvgDelay within the loop
+        float pointAvgDelay = (float)point.avgDelay;
+
         // Check if the point should be visible based on both airport type, average delay, and country name
         bool shouldShow = (selectedAirportType == "All" || point.airportType == selectedAirportType) &&
-                          (selectedAvgDelay == -1 || (point.avgDelay >= selectedAvgDelay && point.avgDelay <= 100)) &&
+                          (selectedAvgDelay == -1 || (pointAvgDelay >= selectedAvgDelay && pointAvgDelay <= 100)) &&
                           (string.IsNullOrEmpty(selectedCountryName) || point.countryName.Equals(selectedCountryName, StringComparison.OrdinalIgnoreCase));
 
         point.gameObject.SetActive(shouldShow);
     }
 }
+
+
+
+
+public static void FilterAirportsByTypeAndCountry(string airportType)
+{
+    selectedAirportType = airportType;
+
+    foreach (PointScript point in allPointsKd)
+    {
+        // Declare pointAvgDelay here
+        float pointAvgDelay = (float)point.avgDelay;
+
+        // Check if the point should be visible based on both airport type, average delay, and country name
+        bool shouldShow = (selectedAirportType == "All" || point.airportType == selectedAirportType) &&
+                          (selectedAvgDelay == -1f || (pointAvgDelay >= selectedAvgDelay && pointAvgDelay <= 100f)) &&
+                          (string.IsNullOrEmpty(selectedCountryName) || point.countryName.Equals(selectedCountryName, StringComparison.OrdinalIgnoreCase));
+
+        point.gameObject.SetActive(shouldShow);
+    }
+}
+
+
+
+
+
+
+
+
+
+
 
 
     private float GetSizeScale(string airportType)
