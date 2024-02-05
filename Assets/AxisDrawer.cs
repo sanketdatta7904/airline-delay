@@ -24,81 +24,85 @@ public class AxisDrawer : MonoBehaviour
         }
 
         DrawAxis();
-    }
 
-    void DrawAxis()
-    {
-        // Draw the positive side of the X and Y axes
-        DrawLine(xAxis, new Vector2(0f, 0f), new Vector2(axisLengthX, 0f), axisThickness, true);
-        DrawLine(yAxis, new Vector2(0f, 0f), new Vector2(0f, axisLengthY), axisThickness, true);
+        // Add arrowhead at the specific point (X = 0, Y = 146)
+        Vector2 specificPoint = new Vector2(0f, 146f);
+        // AddArrowhead(xAxis, specificPoint, Quaternion.Euler(0f, 0f, 0f));
     }
-
- void DrawLine(RectTransform line, Vector2 startPos, Vector2 endPos, float thickness, bool withArrowhead = false)
+void DrawAxis()
 {
-    Image lineImage = line.GetComponent<Image>();
-    if (lineImage == null)
-    {
-        lineImage = line.gameObject.AddComponent<Image>();
-        lineImage.color = Color.grey; // Set the color of the axis lines to grey
-    }
-    else
-    {
-        lineImage.color = Color.grey; // Update the color if the Image component already exists
-    }
+    // Draw the positive side of the X and Y axes
+    DrawLine(xAxis, new Vector2(0f, 0f), new Vector2(axisLengthX, 0f), axisThickness, true);
+    DrawLine(yAxis, new Vector2(0f, 0f), new Vector2(0f, axisLengthY), axisThickness, true);
 
-    line.sizeDelta = new Vector2(Vector2.Distance(startPos, endPos), thickness);
-    line.anchoredPosition = (startPos + endPos) / 2f;
-    line.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(endPos.y - startPos.y, endPos.x - startPos.x) * Mathf.Rad2Deg);
-
-    if (withArrowhead)
-    {
-        DrawArrowhead(line, endPos, line.localRotation);
-    }
+    // Add arrowhead to the end of the X-axis
+    AddArrowhead(xAxis, new Vector2(axisLengthX, 0f), Quaternion.Euler(0f, 0f, 0f));
+    
+    // Add arrowhead to the end of the Y-axis
+    AddArrowhead(yAxis, new Vector2(0f, axisLengthY), Quaternion.Euler(0f, 0f, 90f));
 }
-void DrawArrowhead(RectTransform line, Vector2 position, Quaternion rotation)
+
+
+    void DrawLine(RectTransform line, Vector2 startPos, Vector2 endPos, float thickness, bool withArrowhead = false)
+    {
+        Image lineImage = line.GetComponent<Image>();
+        if (lineImage == null)
+        {
+            lineImage = line.gameObject.AddComponent<Image>();
+            lineImage.color = Color.grey; // Set the color of the axis lines to grey
+        }
+        else
+        {
+            lineImage.color = Color.grey; // Update the color if the Image component already exists
+        }
+
+        line.sizeDelta = new Vector2(Vector2.Distance(startPos, endPos), thickness);
+        line.anchoredPosition = (startPos + endPos) / 2f;
+        line.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(endPos.y - startPos.y, endPos.x - startPos.x) * Mathf.Rad2Deg);
+
+        if (withArrowhead)
+        {
+            AddArrowhead(line, endPos, line.localRotation);
+        }
+    }
+
+void AddArrowhead(RectTransform line, Vector2 position, Quaternion rotation)
 {
     GameObject arrowhead = new GameObject("Arrowhead");
     RectTransform arrowheadRect = arrowhead.AddComponent<RectTransform>();
     Image arrowheadImage = arrowhead.AddComponent<Image>();
 
-    arrowheadImage.color = Color.grey; // Set the color of the arrowhead to grey
+    string path = "Assets/arrow.png"; // Adjust the path as per the actual location
+    Sprite arrowheadSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
 
-    arrowheadRect.sizeDelta = new Vector2(arrowheadSize, arrowheadSize);
-    arrowheadRect.anchoredPosition = position;
-    arrowheadRect.localRotation = rotation * Quaternion.Euler(0f, 0f, -90f); // Correct rotation for a triangle
-
-    // Check if line is not null and has a valid parent
-    if (line != null && line.parent != null)
+    if (arrowheadSprite != null)
     {
-        arrowheadRect.SetParent(line.parent, false);
+        arrowheadImage.sprite = arrowheadSprite;
+        arrowheadRect.sizeDelta = new Vector2(arrowheadSize, arrowheadSize);
+
+        // Adjust the position calculation
+        arrowheadRect.anchoredPosition = position;
+
+        if (line != null && line.parent != null)
+        {
+            arrowheadRect.SetParent(line.parent, false);
+        }
+        else
+        {
+            Debug.LogError("Line is null or missing parent.");
+            Destroy(arrowhead);
+            return;
+        }
+
+        arrowheadRect.anchoredPosition = position;
+        arrowheadRect.localRotation = rotation;
     }
     else
     {
-        Debug.LogError("Line is null or missing parent.");
-        Destroy(arrowhead); // Clean up the arrowhead if there's an issue
-        return;
+        Debug.LogError("Failed to load arrowhead sprite.");
+        Destroy(arrowhead);
     }
-
-    // Create an arrowhead using LineRenderer
-    LineRenderer arrowLine = arrowhead.AddComponent<LineRenderer>();
-    arrowLine.material = new Material(Shader.Find("Standard")); // You might need to adjust the material based on your requirements
-    arrowLine.startWidth = arrowLine.endWidth = axisThickness; // Use axisThickness instead of lineWidth
-
-    // Set arrowhead positions
-    Vector3 p0 = new Vector3(0, arrowheadSize / 2, 0);
-    Vector3 p1 = new Vector3(0, -arrowheadSize / 2, 0);
-
-    // Convert local positions to world positions
-    p0 = arrowheadRect.TransformPoint(p0);
-    p1 = arrowheadRect.TransformPoint(p1);
-
-    arrowLine.positionCount = 2;
-    arrowLine.SetPosition(0, arrowheadRect.position);
-    arrowLine.SetPosition(1, p0);
-    arrowLine.useWorldSpace = true; // Set to use world space coordinates
 }
-
-
 
 
     RectTransform FindAxisByName(string axisName)
