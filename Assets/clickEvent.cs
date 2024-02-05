@@ -29,7 +29,7 @@ void OnMouseDown()
     string message = "Airport Name: " + nearestObj.airportName + "\n" +
                      "Airport Code: " + nearestObj.airportCode + "\n" +
                      "Average Delay: " + nearestObj.avgDelay + "\n" +
-                     "Distance: " + distance + "\n" +
+                //     "Distance: " + distance + "\n" +
                      "Type: " + nearestObj.airportType;
 
     Debug.Log(distance);

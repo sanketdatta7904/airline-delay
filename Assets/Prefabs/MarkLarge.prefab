@@ -104,3 +104,5 @@ MonoBehaviour:
   size: 
   avgDelay: 0
   hidePointsOffMap: 1
+  airportType: 
+  countryName: 

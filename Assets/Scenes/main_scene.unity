@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 119067104}
   - component: {fileID: 119067105}
+  - component: {fileID: 119067106}
   m_Layer: 0
   m_Name: mark_layer
   m_TagString: Untagged
@@ -165,9 +166,31 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 119067103}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 25c0f6d0aed16ad43822a11f596ab829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mark: {fileID: 3763380326231720652, guid: 0819836d118f2244086d6e6ae199d17c, type: 3}
+  markSmall: {fileID: 4295352682144453668, guid: 238d4d3e25107504faff8ba1576cd4f7, type: 3}
+  markMedium: {fileID: 6681253346826333217, guid: 4559632b4361d974eab102c6539355df, type: 3}
+  markLarge: {fileID: 3763380326231720652, guid: 0819836d118f2244086d6e6ae199d17c, type: 3}
+  parent: {fileID: 119067103}
+  allPoints: []
+  map: {fileID: 673166273}
+  airportNameInput: {fileID: 552245970}
+  countrySearchInput: {fileID: 278661956}
+  countryName: 
+--- !u!114 &119067106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 119067103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad566a916d1df224e80a11a6038c3c14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mark: {fileID: 3763380326231720652, guid: 0819836d118f2244086d6e6ae199d17c, type: 3}
@@ -1643,9 +1666,9 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 673166273}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3708e01b8875e240a39cb5fca7edad3, type: 3}
+  m_Script: {fileID: 11500000, guid: bfdbc3b4de0192b4d92d083a75b483e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &706150594
