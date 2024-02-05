@@ -130,6 +130,7 @@ public class MarkSpawner1 : MonoBehaviour
     }
     void OnSearchButtonClicked()
     {
+        ClearExistingRoutes();
         string selectedCountry = countryDropdownList.options[countryDropdownList.value].text;
         string selectedYear = YearDropdown.options[YearDropdown.value].text;
 

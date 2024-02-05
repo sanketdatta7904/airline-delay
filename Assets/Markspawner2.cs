@@ -3,6 +3,8 @@ using Microsoft.Maps.Unity;
 using System;
 using System.Data;
 using System.Collections.Generic;
+using TMPro;
+using System.Linq;
 
 // using System.Data.SQLite;
 using UnityEngine.UI;
@@ -51,6 +53,15 @@ public class MarkSpawner2 : MonoBehaviour
 
     private float lineRendererWidth = 0.001f;
     private float benzierCurve = 0.2f;
+    public TMP_Dropdown sourceAirportList; // Assign in Inspector
+
+    public TMP_Dropdown destinationAirportList;
+
+    public Button SearchButton;
+
+    public string selectedSourceAirport;
+
+    public string selectedDestinationAirport;
 
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
@@ -78,10 +89,60 @@ public class MarkSpawner2 : MonoBehaviour
     Dictionary<string, List<string>> airportReachabilityMap = new Dictionary<string, List<string>>();
     Dictionary<string, (string name, double Latitude, double Longitude)> airportLocationMap = new Dictionary<string, (string, double, double)>();
 
+    Dictionary<string, string> airportNameToCodeMap = new Dictionary<string, string>(); // Name to code mapping
+
     void Start()
     {
-        updateLocation();
+        getReachabilityMap();
+        getAirportDetails();
+        PopulateAirportsDropdown();
+        // sourceAirportList.onValueChanged.AddListener();
+        // YearDropdown.onValueChanged.AddListener(delegate { UpdateSelectedYear(); });
+        GameObject SearchButtonObj = GameObject.Find("SearchButton");
+        if (SearchButtonObj != null)
+        {
+            SearchButton = SearchButtonObj.GetComponent<Button>();
+        }
+        else
+        {
+            Debug.LogError("Dropdown GameObject not found.");
+        }
+        SearchButton.onClick.AddListener(OnSearchButtonClicked);
+    }
 
+private void getReachabilityMap()
+{
+    string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+    IDbConnection dbConnection = new SQLiteConnection(dbPath);
+#endif
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+    IDbConnection dbConnection = new SqliteConnection(dbPath);
+#endif
+
+    dbConnection.Open();
+    string query = "SELECT * FROM airport_reachability;";
+    IDbCommand dbCommand = dbConnection.CreateCommand();
+    dbCommand.CommandText = query;
+    IDataReader reader = dbCommand.ExecuteReader();
+    while (reader.Read())
+    {
+        string sourceAirport = reader["source_airport_id"].ToString();
+        string reachableAirportsString = reader["destination_airport_ids"].ToString();
+
+        // Split the string of reachable airports into an array, trimming each entry
+        var reachableAirports = reachableAirportsString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(airportCode => airportCode.Trim())
+                                    .ToList();
+
+        // Directly assign the list to the source airport key
+        airportReachabilityMap[sourceAirport] = reachableAirports;
+    }
+    dbConnection.Close();
+}
+
+    private void getAirportDetails()
+    {
         string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
@@ -91,263 +152,184 @@ public class MarkSpawner2 : MonoBehaviour
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             IDbConnection dbConnection = new SqliteConnection(dbPath);
 #endif
-        //IDbConnection dbConnection = new SQLiteConnection(dbPath);
-
-        try
+        dbConnection.Open();
+        string query = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays;";
+        IDbCommand dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = query;
+        IDataReader reader = dbCommand.ExecuteReader();
+        while (reader.Read())
         {
-            dbConnection.Open();
-
-            // Load reachability data
-            string queryReachability = "SELECT source_airport_id, destination_airport_ids FROM airport_reachability";
-            IDbCommand commandReachability = dbConnection.CreateCommand();
-            commandReachability.CommandText = queryReachability;
-            using (IDataReader reader1 = commandReachability.ExecuteReader())
-            {
-                while (reader1.Read())
-                {
-                    string source = reader1.GetString(0);
-                    string destination = reader1.GetString(1);
-
-                    if (!airportReachabilityMap.ContainsKey(source))
-                    {
-                        airportReachabilityMap[source] = new List<string>();
-                    }
-                    airportReachabilityMap[source].Add(destination);
-                }
-            }
-
-            // Load airport location data
-            string queryLocations = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays";
-            IDbCommand commandLocations = dbConnection.CreateCommand();
-            commandLocations.CommandText = queryLocations;
-            using (IDataReader reader2 = commandLocations.ExecuteReader())
-            {
-                while (reader2.Read())
-                {
-                    string code = reader2.GetString(0);
-                    string name = reader2.GetString(1);
-                    double lat = reader2.GetDouble(2);
-                    double lon = reader2.GetDouble(3);
-                    airportLocationMap[code] = (name, lat, lon);
-                }
-            }
-
-            string query = "SELECT * FROM route_delay_quarterly WHERE Source_country='Finland' AND Year = 2015";
-            IDbCommand dbCommand = dbConnection.CreateCommand();
-            dbCommand.CommandText = query;
-
-            IDataReader reader = dbCommand.ExecuteReader();
-            while (reader.Read())
-            {
-                counter += 1;
-                string routeID = reader.IsDBNull(reader.GetOrdinal("RouteID")) ? string.Empty : reader.GetString(reader.GetOrdinal("RouteID"));
-                string[] airports = routeID.Split('-');
-                Array.Sort(airports);
-                string standardizedRouteID = string.Join("-", airports);
-                RouteData data = new RouteData
-                {
-                    SourceLatitude = reader.IsDBNull(reader.GetOrdinal("Source_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Source_latitude")),
-                    SourceLongitude = reader.IsDBNull(reader.GetOrdinal("Source_longitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Source_longitude")),
-                    DestLatitude = reader.IsDBNull(reader.GetOrdinal("Dest_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_latitude")),
-                    DestLongitude = reader.IsDBNull(reader.GetOrdinal("Dest_longitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_longitude")),
-                    AverageDelay = reader.IsDBNull(reader.GetOrdinal("Average_Delay")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Average_Delay")),
-                    TrafficCount = reader.IsDBNull(reader.GetOrdinal("Traffic_Count")) ? 0 : reader.GetDouble(reader.GetOrdinal("Traffic_Count"))
-                };
-
-                if (!routeDataMap.ContainsKey(standardizedRouteID))
-                {
-                    routeDataMap.Add(standardizedRouteID, data);
-                }
-                else
-                {
-                    var existingData = routeDataMap[standardizedRouteID];
-                    double oldTrafficCount = existingData.TrafficCount;
-                    double oldTotalDelay = existingData.AverageDelay * oldTrafficCount;
-
-                    existingData.TrafficCount += data.TrafficCount;
-
-                    double newTotalDelay = oldTotalDelay + data.AverageDelay * data.TrafficCount;
-                    existingData.AverageDelay = newTotalDelay / existingData.TrafficCount;
-
-                    routeDataMap[standardizedRouteID] = existingData;
-                }
-            }
-            searchRoutesButton.onClick.AddListener(FindAndDisplayRoutes);
+            string code = reader["airport_code"].ToString();
+            string name = reader["airport_name"].ToString();
+            double latitude = double.Parse(reader["latitude"].ToString());
+            double longitude = double.Parse(reader["longitude"].ToString());
+            airportLocationMap[code] = (name, latitude, longitude);
+            airportNameToCodeMap[name] = code;
 
         }
-        catch (Exception e)
+        dbConnection.Close();
+    }
+    private string GetAirportCodeFromName(string airportName)
+{
+    if (airportNameToCodeMap.TryGetValue(airportName, out string code))
+    {
+        return code;
+    }
+    else
+    {
+        Debug.LogError($"Airport code not found for {airportName}");
+        return null; // Or handle this case as appropriate
+    }
+}
+
+    void FetchAndDrawRoutesForSourceDestAirport(string sourceAirport, string targetAirport)
+    {
+        updateLocation();
+
+        // First, get the airport codes from the names
+        string sourceCode = GetAirportCodeFromName(sourceAirport);
+        string destinationCode = GetAirportCodeFromName(targetAirport);
+
+        // Check direct reachability
+        if (airportReachabilityMap.ContainsKey(sourceCode) && airportReachabilityMap[sourceCode].Contains(destinationCode))
         {
-            Debug.LogError($"Error executing query: {e.Message}");
+            var source = airportLocationMap[sourceCode];
+            var destination = airportLocationMap[destinationCode];
+            SpawnMarkAtLatLong($"{sourceCode}-{destinationCode}", source.Latitude, source.Longitude, destination.Latitude, destination.Longitude, 0, 0);
         }
-        finally
+
+        // Check one-hop reachability
+        foreach (var intermediateCode in airportReachabilityMap[sourceCode])
         {
-            if (dbConnection.State == ConnectionState.Open)
-                dbConnection.Close();
-        }
-        // AnalyzeAverageDelays();
-        Debug.Log("debugging counter");
-        Debug.Log(counter);
-        foreach (var route in routeDataMap)
-        {
-            Debug.Log(route);
-            SpawnMarkAtLatLong(route.Key, route.Value.SourceLatitude, route.Value.SourceLongitude, route.Value.DestLatitude, route.Value.DestLongitude, route.Value.AverageDelay, route.Value.TrafficCount);
+            if (airportReachabilityMap.ContainsKey(intermediateCode) && airportReachabilityMap[intermediateCode].Contains(destinationCode))
+            {
+                var source = airportLocationMap[sourceCode];
+                var intermediate = airportLocationMap[intermediateCode];
+                var destination = airportLocationMap[destinationCode];
+
+                // Render source to intermediate
+                SpawnMarkAtLatLong($"{sourceCode}-{intermediateCode}", source.Latitude, source.Longitude, intermediate.Latitude, intermediate.Longitude, 0, 0);
+
+                // Render intermediate to destination
+                SpawnMarkAtLatLong($"{intermediateCode}-{destinationCode}", intermediate.Latitude, intermediate.Longitude, destination.Latitude, destination.Longitude, 0, 0);
+            }
         }
     }
-    private void FindAndDisplayRoutes()
+
+
+    void OnSearchButtonClicked()
     {
-        // Get the source and destination airport codes from the input fields
-        string sourceAirport = sourceAirportInputField.text;
-        string destinationAirport = destinationAirportInputField.text;
-
-        // Validate inputs...
-
-        // Clear existing routes on the map
         ClearExistingRoutes();
+        string selectedSourceAirport = sourceAirportList.options[sourceAirportList.value].text;
+        string selectedDestinationAirport = destinationAirportList.options[destinationAirportList.value].text;
 
-        // Find direct routes and one-hop routes
-        FindDirectRoutes(sourceAirport, destinationAirport);
-        // FindOneHopRoutes(sourceAirport, destinationAirport);
+        if (selectedSourceAirport == "Source airport" || selectedDestinationAirport == "Destination airport")
+        {
+            Debug.Log("Please select both source and destination airport before searching.");
+            return;
+        }
+
+        // Perform your search logic here using selectedCountry and selectedYear
+        FetchAndDrawRoutesForSourceDestAirport(selectedSourceAirport, selectedDestinationAirport);
     }
 
-    private void ClearExistingRoutes()
+    void ClearExistingRoutes()
     {
-        // Destroy all line renderer objects
+        // Example: Destroy all children of the parent GameObject that holds the markers and lines
         foreach (var endpoint in lineRendererEndpoints)
         {
-            if (endpoint.LineRenderer != null)
-            {
-                Destroy(endpoint.LineRenderer.gameObject);
-            }
-            if (endpoint.StartMarker != null)
-            {
-                Destroy(endpoint.StartMarker);
-            }
-            if (endpoint.EndMarker != null)
-            {
-                Destroy(endpoint.EndMarker);
-            }
+            if (endpoint.StartMarker != null) Destroy(endpoint.StartMarker);
+            if (endpoint.EndMarker != null) Destroy(endpoint.EndMarker);
+            if (endpoint.LineRenderer != null) Destroy(endpoint.LineRenderer.gameObject); // Assuming LineRenderer is attached to a GameObject
         }
-        // Clear the list after destroying the GameObjects
+
+        // Clear any stored references if necessary
         lineRendererEndpoints.Clear();
+        allPointsKd.Clear(); // Clear the KD-tree or reinitialize it
+        routeDataMap.Clear();
 
-        // Optionally, clear markers if they are not reused for new routes
-        // This might involve clearing or resetting your KD-Tree or other data structures tracking markers
-    }
-
-    private void FindDirectRoutes(string source, string destination)
-    {
-        if (airportReachabilityMap.TryGetValue(source, out List<string> destinations) && destinations.Contains(destination))
+        foreach (Transform child in parent.transform)
         {
-            // Direct route exists, get locations
-            (string sourceName, double sourceLat, double sourceLon) = airportLocationMap[source];
-            (string destName, double destLat, double destLon) = airportLocationMap[destination];
-
-            // Use your existing method to spawn markers and draw routes
-            SpawnMarkAtLatLong($"{source}-{destination}", sourceLat, sourceLon, destLat, destLon, 0, 0); // Adjust parameters as needed
-        }
-        else
-        {
-            Debug.LogError($"No direct route found from {source} to {destination}.");
+            Destroy(child.gameObject);
         }
     }
-
-    //     private void FindOneHopRoutes(string source, string destination)
-    //     {
-    //         // This method requires more complex database queries or multiple queries
-    //         // to find intermediate airports. This is a simplified conceptual approach.
-
-    //         // First, find all destinations from the source
-    //         var possibleHops = new List<string>(); // This will store intermediate airports
-    //         string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
-    //         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
-    //         // either use SQLite on windows platform or Sqlite on macOS platform
-    // #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-    //         IDbConnection dbConnection = new SQLiteConnection(dbPath);
-    // #endif
-    // #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-    //             IDbConnection dbConnection = new SqliteConnection(dbPath);
-    // #endif
-    //         try
-    //         {
-    //             dbConnection.Open();
-    //             string findHopsQuery = $"SELECT DISTINCT DestinationAirport FROM Routes WHERE SourceAirport = '{source}' AND DestinationAirport != '{destination}'";
-    //             IDbCommand findHopsCommand = dbConnection.CreateCommand();
-    //             findHopsCommand.CommandText = findHopsQuery;
-    //             using (IDataReader reader = findHopsCommand.ExecuteReader())
-    //             {
-    //                 while (reader.Read())
-    //                 {
-    //                     possibleHops.Add(reader["DestinationAirport"].ToString());
-    //                 }
-    //             }
-
-    //             // Then, for each possible intermediate hop, check if there's a route to the destination
-    //             foreach (var hop in possibleHops)
-    //             {
-    //                 string findConnectingFlightsQuery = $"SELECT * FROM Routes WHERE SourceAirport = '{hop}' AND DestinationAirport = '{destination}'";
-    //                 IDbCommand findConnectingFlightsCommand = dbConnection.CreateCommand();
-    //                 findConnectingFlightsCommand.CommandText = findConnectingFlightsQuery;
-    //                 using (IDataReader reader = findConnectingFlightsCommand.ExecuteReader())
-    //                 {
-    //                     while (reader.Read())
-    //                     {
-    //                         // Assuming you have a method to parse and draw these routes
-    //                         // You would need to draw two routes: source -> hop, hop -> destination
-    //                         // This is a simplified example, adjust according to your data schema and drawing methods
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             Debug.LogError($"Database error: {e.Message}");
-    //         }
-    //         finally
-    //         {
-    //             dbConnection.Close();
-    //         }
-    //     }
-
-
-    void AnalyzeAverageDelays()
+    void PopulateAirportsDropdown()
     {
-        int rangeIncrement = 5;
-        Dictionary<string, int> delayHistogram = new Dictionary<string, int>();
+        // Assuming you have a method to get country names from your database or a predefined list
+        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
+        // either use SQLite on windows platform or Sqlite on macOS platform
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        IDbConnection dbConnection = new SQLiteConnection(dbPath);
+#endif
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            IDbConnection dbConnection = new SqliteConnection(dbPath);
+#endif
+        List<string> sourceAirportNames = new List<string>();
+        dbConnection.Open();
+        string query = "SELECT DISTINCT airport_name from aggregated_delays WHERE length(airport_name)>0 ORDER BY airport_name ASC;";
+        IDbCommand dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = query;
 
-        foreach (var route in routeDataMap.Values)
+        IDataReader reader = dbCommand.ExecuteReader();
+        sourceAirportNames.Add("Source Airport");
+        while (reader.Read())
         {
-            int rangeIndex = (int)(route.AverageDelay / rangeIncrement);
-            string rangeKey = $"{rangeIndex * rangeIncrement}-{(rangeIndex + 1) * rangeIncrement}";
-
-            if (!delayHistogram.ContainsKey(rangeKey))
+            sourceAirportNames.Add(DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString());
+        }
+        GameObject sourceAirportDropdownObject = GameObject.Find("Source airport");
+        if (sourceAirportDropdownObject != null)
+        {
+            sourceAirportList = sourceAirportDropdownObject.GetComponent<TMP_Dropdown>();
+            if (sourceAirportList != null)
             {
-                delayHistogram[rangeKey] = 1;
+                sourceAirportList.AddOptions(sourceAirportNames);
+                sourceAirportList.value = 0; // Set to default option
+                sourceAirportList.RefreshShownValue();
+                // foreach (var item in countryNames)
+                // {
+                //     countryDropdownList.options.Add(new TMP_Dropdown.OptionData() { text = item });
+                // }
+                // Populate dropdown
             }
             else
             {
-                delayHistogram[rangeKey]++;
+                Debug.LogError("Dropdown component not found on the object.");
             }
         }
-
-        foreach (var range in delayHistogram)
+        else
         {
-            Debug.Log($"Average Delay {range.Key}: Count = {range.Value}");
+            Debug.LogError("Dropdown GameObject not found.");
         }
+        GameObject destinationAirportDropdownObject = GameObject.Find("Destination airport");
+        if (destinationAirportDropdownObject != null)
+        {
+            destinationAirportList = destinationAirportDropdownObject.GetComponent<TMP_Dropdown>();
+            if (destinationAirportList != null)
+            {
+                destinationAirportList.AddOptions(sourceAirportNames);
+                destinationAirportList.value = 0; // Set to default option
+                destinationAirportList.RefreshShownValue();
+                // foreach (var item in countryNames)
+                // {
+                //     countryDropdownList.options.Add(new TMP_Dropdown.OptionData() { text = item });
+                // }
+                // Populate dropdown
+            }
+            else
+            {
+                Debug.LogError("Dropdown component not found on the object.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Dropdown GameObject not found.");
+        }
+
+
     }
 
-    //  public static void FilterAirportsByAvgDelay(float avgDelay)
-    // {
-    //     selectedAvgDelay = avgDelay;
 
-    //     foreach (PointScript point in allPointsKd)
-    //     {
-    //         float pointAvgDelay = (float)point.avgDelay;
-
-    //         point.gameObject.SetActive(
-    //             (selectedAvgDelay == -1f || (pointAvgDelay >= selectedAvgDelay && pointAvgDelay <= 100f))
-    //         );
-    //     }
-    // }
 
     private void updateLocation()
     {
