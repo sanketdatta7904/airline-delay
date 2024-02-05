@@ -31,13 +31,13 @@ public class TooltipManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Input.mousePosition;
         // this sets the middle of the tooltip to the mouse position
         // we wamt to put the bootom left corner of the tooltip to the mouse position
         // so we need to add an offset
-        double xOffset = 250;
-        double yOffset = 110;
-        transform.position = new Vector3((float)(transform.position.x + xOffset), (float)(transform.position.y + yOffset), transform.position.z);
+        //transform.position = Input.mousePosition;
+        //double xOffset = 250;
+        //double yOffset = 110;
+        //transform.position = new Vector3((float)(transform.position.x + xOffset), (float)(transform.position.y + yOffset), transform.position.z);
     }
 
     public void SetAndShowTooltip(string text)

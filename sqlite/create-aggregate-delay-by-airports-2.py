@@ -4,7 +4,7 @@ import sqlite3
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation_new.db' 
+sqlite_db_path = 'D:/sqlite/aviation_new.db'
 
 
 
@@ -14,7 +14,6 @@ query_create_table = """
 CREATE TABLE IF NOT EXISTS aggregated_delays (
     airport_code TEXT,
     airport_name TEXT,
-    ades_type TEXT,
     ades_type TEXT,
     latitude REAL,
     longitude REAL,

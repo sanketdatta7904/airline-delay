@@ -307,7 +307,9 @@ public class MarkSpawner1 : MonoBehaviour
     {
         updateLocation();
 
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN

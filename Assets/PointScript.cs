@@ -17,11 +17,13 @@ public class PointScript : MonoBehaviour
     public double avgDelay = 0.0; // average delay of the airport
     public bool hidePointsOffMap = true;
     public string airportType;
+      public string countryName;
 
     private double maxX = 1.3;
     private double maxY = 0.51;
     private double minX = -1.3;
     private double minY = -0.51;
+
 
     // Start is called before the first frame update
     void Start()
