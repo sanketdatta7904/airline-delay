@@ -66,6 +66,11 @@ public class MarkSpawner2 : MonoBehaviour
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
 
+    private string dbPath = "URI=file:" + Application.dataPath + "/../../aviation_new.db"; // Powerwall
+    //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db"; // Sanket
+
+
+
     // private List<LineRenderer> lineRenderers = new List<LineRenderer>();
     public class LineRendererEndpoints
     {
@@ -112,7 +117,7 @@ Dictionary<string, (string name, double Latitude, double Longitude, double Avera
 
 private void getReachabilityMap()
 {
-    string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+    //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
     IDbConnection dbConnection = new SQLiteConnection(dbPath);
 #endif
@@ -143,7 +148,7 @@ private void getReachabilityMap()
 
     public void getAirportDetails()
     {
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -261,7 +266,7 @@ private void getReachabilityMap()
     void PopulateAirportsDropdown()
     {
         // Assuming you have a method to get country names from your database or a predefined list
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN

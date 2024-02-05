@@ -66,6 +66,8 @@ public class MarkSpawner1 : MonoBehaviour
 
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
+    private string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db"; // Powerwall
+    //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db"; // Sanket
 
     // private List<LineRenderer> lineRenderers = new List<LineRenderer>();
     public class LineRendererEndpoints
@@ -139,16 +141,18 @@ public class MarkSpawner1 : MonoBehaviour
     }
     public void getAirportDetails()
     {
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
-        // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
-        // either use SQLite on windows platform or Sqlite on macOS platform
+    string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db"; // Powerwall
+
+    //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+    // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
+    // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         IDbConnection dbConnection = new SQLiteConnection(dbPath);
 #endif
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             IDbConnection dbConnection = new SqliteConnection(dbPath);
 #endif
-        dbConnection.Open();
+    dbConnection.Open();
         string query = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays;";
         IDbCommand dbCommand = dbConnection.CreateCommand();
         dbCommand.CommandText = query;
@@ -223,7 +227,7 @@ public class MarkSpawner1 : MonoBehaviour
     void PopulateCountryDropdown()
     {
         // Assuming you have a method to get country names from your database or a predefined list
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -308,7 +312,7 @@ public class MarkSpawner1 : MonoBehaviour
         updateLocation();
 
         //string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
-        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+        //string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
 
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
         // either use SQLite on windows platform or Sqlite on macOS platform
