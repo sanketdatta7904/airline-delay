@@ -15,6 +15,12 @@ public class LineScript : MonoBehaviour
     public string routeID = "";
     public double averageDelay = 0.0;
     public double trafficCount = 0;
+    public string  sourceAirport = "";
+        public string  destAirport = "";
+
+    public string  sourceCountry = "";
+
+    public string  destCountry = "";
 
     void Start()
     {

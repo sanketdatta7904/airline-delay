@@ -54,6 +54,8 @@ public class MarkSpawner1 : MonoBehaviour
     private float benzierCurve = 0.2f;
     public TMP_Dropdown countryDropdownList; // Assign in Inspector
 
+    public TMP_Dropdown destCountryDropdown;
+
     public TMP_Dropdown YearDropdown;
 
     public Button SearchButton;
@@ -81,19 +83,32 @@ public class MarkSpawner1 : MonoBehaviour
         public double DestLongitude;
         public double AverageDelay;
         public double TrafficCount;
+
+        public string SourceAirport;
+
+        public string DestAirport;
+
+        public string SourceCountry;
+
+        public string DestCountry;
     }
 
     private List<LineRendererEndpoints> lineRendererEndpoints = new List<LineRendererEndpoints>();
     private Dictionary<string, RouteData> routeDataMap = new Dictionary<string, RouteData>();
-    Dictionary<string, List<string>> airportReachabilityMap = new Dictionary<string, List<string>>();
+
+    public static Dictionary<string, (string name, double Latitude, double Longitude)> airportDetailsMap = new Dictionary<string, (string, double, double)>();
+
     Dictionary<string, (string name, double Latitude, double Longitude)> airportLocationMap = new Dictionary<string, (string, double, double)>();
+
+    Dictionary<string, string> airportNameToCodeMap = new Dictionary<string, string>();
 
     void Start()
     {
+        getAirportDetails();
         PopulateCountryDropdown();
         countryDropdownList.onValueChanged.AddListener(UpdateSelectedCountry);
         YearDropdown.onValueChanged.AddListener(delegate { UpdateSelectedYear(); });
- GameObject SearchButtonObj = GameObject.Find("SearchButton");
+        GameObject SearchButtonObj = GameObject.Find("SearchButton");
         if (SearchButtonObj != null)
         {
             SearchButton = SearchButtonObj.GetComponent<Button>();
@@ -122,7 +137,34 @@ public class MarkSpawner1 : MonoBehaviour
         selectedCountry = countryDropdownList.options[index].text;
         Debug.Log("Selected country: " + selectedCountry);
     }
+    public void getAirportDetails()
+    {
+        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+        // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
+        // either use SQLite on windows platform or Sqlite on macOS platform
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        IDbConnection dbConnection = new SQLiteConnection(dbPath);
+#endif
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            IDbConnection dbConnection = new SqliteConnection(dbPath);
+#endif
+        dbConnection.Open();
+        string query = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays;";
+        IDbCommand dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = query;
+        IDataReader reader = dbCommand.ExecuteReader();
+        while (reader.Read())
+        {
+            string code = reader["airport_code"].ToString();
+            string name = reader["airport_name"].ToString();
+            double latitude = double.Parse(reader["latitude"].ToString());
+            double longitude = double.Parse(reader["longitude"].ToString());
+            airportLocationMap[code] = (name, latitude, longitude);
+            airportNameToCodeMap[name] = code;
 
+        }
+        dbConnection.Close();
+    }
     void UpdateSelectedYear()
     {
         selectedYear = YearDropdown.options[YearDropdown.value].text;
@@ -131,17 +173,31 @@ public class MarkSpawner1 : MonoBehaviour
     void OnSearchButtonClicked()
     {
         ClearExistingRoutes();
-        string selectedCountry = countryDropdownList.options[countryDropdownList.value].text;
+        string selectedSourceCountry = countryDropdownList.options[countryDropdownList.value].text;
+        string selectedDestCountry = destCountryDropdown.options[destCountryDropdown.value].text;
         string selectedYear = YearDropdown.options[YearDropdown.value].text;
 
-        if (selectedCountry == "Source Country" || selectedYear == "Year")
+        if (selectedYear == "Year" || (selectedSourceCountry == "Source Country" && selectedDestCountry == "Destination Country"))
         {
             Debug.Log("Please select both a country and a year before searching.");
             return;
         }
+        string query = $"SELECT * FROM route_delay_quarterly WHERE Year = '{selectedYear}'";
+
+        // Check if source country is provided and not the placeholder/default value.
+        if (selectedSourceCountry != "Source Country")
+        {
+            query += $" AND Source_country = '{selectedSourceCountry}'";
+        }
+
+        // Check if destination country is provided and not the placeholder/default value.
+        if (selectedDestCountry != "Destination Country")
+        {
+            query += $" AND Dest_country = '{selectedDestCountry}'";
+        }
 
         // Perform your search logic here using selectedCountry and selectedYear
-        FetchAndDrawRoutesForCountryAndYear(selectedCountry, selectedYear);
+        FetchAndDrawRoutesForCountryAndYear(query);
     }
 
     void ClearExistingRoutes()
@@ -197,6 +253,7 @@ public class MarkSpawner1 : MonoBehaviour
                 countryDropdownList.AddOptions(countryNames);
                 countryDropdownList.value = 0; // Set to default option
                 countryDropdownList.RefreshShownValue();
+
                 // foreach (var item in countryNames)
                 // {
                 //     countryDropdownList.options.Add(new TMP_Dropdown.OptionData() { text = item });
@@ -212,8 +269,28 @@ public class MarkSpawner1 : MonoBehaviour
         {
             Debug.LogError("Dropdown GameObject not found.");
         }
+        countryNames[0] = "Destination Country";
+        GameObject destdropdownObject = GameObject.Find("DestDropdownCountry");
+        if (destdropdownObject != null)
+        {
+            destCountryDropdown = destdropdownObject.GetComponent<TMP_Dropdown>();
+            if (destCountryDropdown != null)
+            {
+                destCountryDropdown.AddOptions(countryNames);
+                destCountryDropdown.value = 0; // Set to default option
+                destCountryDropdown.RefreshShownValue();
+            }
+            else
+            {
+                Debug.LogError("Dropdown component not found on the object.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Dropdown GameObject not found.");
+        }
 
-         GameObject yearDropdown = GameObject.Find("DropdownYear");
+        GameObject yearDropdown = GameObject.Find("DropdownYear");
         if (yearDropdown != null)
         {
             YearDropdown = yearDropdown.GetComponent<TMP_Dropdown>();
@@ -226,7 +303,7 @@ public class MarkSpawner1 : MonoBehaviour
     }
 
 
-    void FetchAndDrawRoutesForCountryAndYear(string countryName, string year)
+    void FetchAndDrawRoutesForCountryAndYear(string query)
     {
         updateLocation();
 
@@ -247,7 +324,6 @@ public class MarkSpawner1 : MonoBehaviour
 
 
 
-            string query = $"SELECT * FROM route_delay_quarterly WHERE Source_country='{countryName}' AND Year = '{year}'";
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
@@ -259,6 +335,18 @@ public class MarkSpawner1 : MonoBehaviour
                 string[] airports = routeID.Split('-');
                 Array.Sort(airports);
                 string standardizedRouteID = string.Join("-", airports);
+                // Retrieve airport names using codes
+                string[] airportCodes = routeID.Split('-');
+                string sourceCode = airportCodes[0];
+                string destCode = airportCodes[1];
+
+                string sourceAirportName = airportLocationMap.ContainsKey(sourceCode) ? airportLocationMap[sourceCode].name : "Unknown";
+                string destAirportName = airportLocationMap.ContainsKey(destCode) ? airportLocationMap[destCode].name : "Unknown";
+
+                // Directly fetch country names from the database
+                string sourceCountry = reader["source_country"].ToString();
+                string destCountry = reader["dest_country"].ToString();
+
                 RouteData data = new RouteData
                 {
                     SourceLatitude = reader.IsDBNull(reader.GetOrdinal("Source_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Source_latitude")),
@@ -266,7 +354,11 @@ public class MarkSpawner1 : MonoBehaviour
                     DestLatitude = reader.IsDBNull(reader.GetOrdinal("Dest_latitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_latitude")),
                     DestLongitude = reader.IsDBNull(reader.GetOrdinal("Dest_longitude")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Dest_longitude")),
                     AverageDelay = reader.IsDBNull(reader.GetOrdinal("Average_Delay")) ? 0.0 : reader.GetDouble(reader.GetOrdinal("Average_Delay")),
-                    TrafficCount = reader.IsDBNull(reader.GetOrdinal("Traffic_Count")) ? 0 : reader.GetDouble(reader.GetOrdinal("Traffic_Count"))
+                    TrafficCount = reader.IsDBNull(reader.GetOrdinal("Traffic_Count")) ? 0 : reader.GetDouble(reader.GetOrdinal("Traffic_Count")),
+                    SourceAirport = sourceAirportName,
+                    DestAirport = destAirportName,
+                    SourceCountry = sourceCountry,
+                    DestCountry = destCountry,
                 };
 
                 if (!routeDataMap.ContainsKey(standardizedRouteID))
@@ -304,7 +396,7 @@ public class MarkSpawner1 : MonoBehaviour
         foreach (var route in routeDataMap)
         {
             Debug.Log(route);
-            SpawnMarkAtLatLong(route.Key, route.Value.SourceLatitude, route.Value.SourceLongitude, route.Value.DestLatitude, route.Value.DestLongitude, route.Value.AverageDelay, route.Value.TrafficCount);
+            SpawnMarkAtLatLong(route.Key, route.Value.SourceLatitude, route.Value.SourceLongitude, route.Value.DestLatitude, route.Value.DestLongitude, route.Value.AverageDelay, route.Value.TrafficCount, route.Value.SourceAirport, route.Value.DestAirport, route.Value.SourceCountry, route.Value.DestCountry);
         }
     }
 
@@ -359,7 +451,7 @@ public class MarkSpawner1 : MonoBehaviour
         parent.transform.position = new Vector3((float)-xOffSet, (float)-yOffSet, 0.0f);
     }
 
-    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, double trafficCount)
+    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, double trafficCount, string SourceAirport,string  DestAirport,string  SourceCountry,string DestCountry)
     {
 
         // GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
@@ -401,6 +493,12 @@ public class MarkSpawner1 : MonoBehaviour
         lineScript.routeID = RouteID;
         lineScript.averageDelay = avgDelay;
         lineScript.trafficCount = trafficCount; // Ensure trafficCount is cast to int if necessary
+        lineScript.sourceAirport = SourceAirport;
+                lineScript.destAirport = DestAirport;
+
+        lineScript.sourceCountry = SourceCountry;
+
+        lineScript.destCountry = DestCountry;
 
 
         Debug.Log($"Line created with RouteID: {lineScript.routeID}, AvgDelay: {lineScript.averageDelay}, TrafficCount: {lineScript.trafficCount}");

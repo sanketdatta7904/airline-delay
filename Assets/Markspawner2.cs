@@ -87,7 +87,7 @@ public class MarkSpawner2 : MonoBehaviour
     private List<LineRendererEndpoints> lineRendererEndpoints = new List<LineRendererEndpoints>();
     private Dictionary<string, RouteData> routeDataMap = new Dictionary<string, RouteData>();
     Dictionary<string, List<string>> airportReachabilityMap = new Dictionary<string, List<string>>();
-    Dictionary<string, (string name, double Latitude, double Longitude)> airportLocationMap = new Dictionary<string, (string, double, double)>();
+Dictionary<string, (string name, double Latitude, double Longitude, double AverageDelay)> airportLocationMap = new Dictionary<string, (string, double, double, double)>();
 
     Dictionary<string, string> airportNameToCodeMap = new Dictionary<string, string>(); // Name to code mapping
 
@@ -141,7 +141,7 @@ private void getReachabilityMap()
     dbConnection.Close();
 }
 
-    private void getAirportDetails()
+    public void getAirportDetails()
     {
         string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
@@ -153,7 +153,7 @@ private void getReachabilityMap()
             IDbConnection dbConnection = new SqliteConnection(dbPath);
 #endif
         dbConnection.Open();
-        string query = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays;";
+        string query = "SELECT airport_code, airport_name, latitude, longitude, avg_delay FROM aggregated_delays;";
         IDbCommand dbCommand = dbConnection.CreateCommand();
         dbCommand.CommandText = query;
         IDataReader reader = dbCommand.ExecuteReader();
@@ -163,7 +163,9 @@ private void getReachabilityMap()
             string name = reader["airport_name"].ToString();
             double latitude = double.Parse(reader["latitude"].ToString());
             double longitude = double.Parse(reader["longitude"].ToString());
-            airportLocationMap[code] = (name, latitude, longitude);
+            double averageDelay = reader.IsDBNull(reader.GetOrdinal("avg_delay")) ? 0.0 : double.Parse(reader["avg_delay"].ToString());
+
+        airportLocationMap[code] = (name, latitude, longitude, averageDelay);
             airportNameToCodeMap[name] = code;
 
         }
@@ -195,7 +197,8 @@ private void getReachabilityMap()
         {
             var source = airportLocationMap[sourceCode];
             var destination = airportLocationMap[destinationCode];
-            SpawnMarkAtLatLong($"{sourceCode}-{destinationCode}", source.Latitude, source.Longitude, destination.Latitude, destination.Longitude, 0, 0);
+            double directRouteAvgDelay = (source.AverageDelay + destination.AverageDelay) / 2;
+            SpawnMarkAtLatLong($"{sourceCode}-{destinationCode}", source.Latitude, source.Longitude, destination.Latitude, destination.Longitude, directRouteAvgDelay, 0);
         }
 
         // Check one-hop reachability
@@ -206,12 +209,14 @@ private void getReachabilityMap()
                 var source = airportLocationMap[sourceCode];
                 var intermediate = airportLocationMap[intermediateCode];
                 var destination = airportLocationMap[destinationCode];
+            double intermediateRouteAvgDelay = (source.AverageDelay + intermediate.AverageDelay) / 2;
+                        double destRouteAvgDelay = (intermediate.AverageDelay + destination.AverageDelay) / 2;
 
                 // Render source to intermediate
-                SpawnMarkAtLatLong($"{sourceCode}-{intermediateCode}", source.Latitude, source.Longitude, intermediate.Latitude, intermediate.Longitude, 0, 0);
+                SpawnMarkAtLatLong($"{sourceCode}-{intermediateCode}", source.Latitude, source.Longitude, intermediate.Latitude, intermediate.Longitude, intermediateRouteAvgDelay, 0);
 
                 // Render intermediate to destination
-                SpawnMarkAtLatLong($"{intermediateCode}-{destinationCode}", intermediate.Latitude, intermediate.Longitude, destination.Latitude, destination.Longitude, 0, 0);
+                SpawnMarkAtLatLong($"{intermediateCode}-{destinationCode}", intermediate.Latitude, intermediate.Longitude, destination.Latitude, destination.Longitude, destRouteAvgDelay, 0);
             }
         }
     }
@@ -223,7 +228,7 @@ private void getReachabilityMap()
         string selectedSourceAirport = sourceAirportList.options[sourceAirportList.value].text;
         string selectedDestinationAirport = destinationAirportList.options[destinationAirportList.value].text;
 
-        if (selectedSourceAirport == "Source airport" || selectedDestinationAirport == "Destination airport")
+        if (selectedSourceAirport == "Source Airport" || selectedDestinationAirport == "Destination Airport")
         {
             Debug.Log("Please select both source and destination airport before searching.");
             return;
@@ -301,6 +306,7 @@ private void getReachabilityMap()
         {
             Debug.LogError("Dropdown GameObject not found.");
         }
+        sourceAirportNames[0] = "Destination Airport";
         GameObject destinationAirportDropdownObject = GameObject.Find("Destination airport");
         if (destinationAirportDropdownObject != null)
         {
