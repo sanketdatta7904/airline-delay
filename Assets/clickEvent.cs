@@ -9,6 +9,7 @@ public class clickEvent : MonoBehaviour
         Debug.Log("Mouse down");
         Vector3 mousePos = Input.mousePosition;
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        Debug.Log("clicked at" + worldPos);
 
         PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
 

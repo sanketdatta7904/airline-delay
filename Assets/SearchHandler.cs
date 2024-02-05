@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections;
 using Microsoft.Maps.Unity;
 using Microsoft.Maps.Unity.Search;
 using TMPro;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 [RequireComponent(typeof(MapRenderer))]
@@ -13,6 +15,9 @@ public class SearchHandler : MonoBehaviour
     TMP_InputField _inputField = null;
     //dropdown for search results
     public TMP_Dropdown _dropdown = null;
+    public GameObject markLayer;
+    public GameObject highlightPrefab;
+
 
 
     public async void OnSearch()
@@ -84,8 +89,22 @@ public class SearchHandler : MonoBehaviour
             if (result.Locations.Count > 0)
             {
                 var location = result.Locations[0];
+
+                // get tge position of the selected location
+                var latitude = location.Point.LatitudeInDegrees;
+                var longitude = location.Point.LongitudeInDegrees;
+
+                // get the closest airport to the selected location
+                //HighlightClosestAirport(latitude, longitude);
+
                 var mapRenderer = GetComponent<MapRenderer>();
-                mapRenderer.SetMapScene(new MapSceneOfLocationAndZoomLevel(location.Point, 6), MapSceneAnimationKind.Bow, 5.0f);
+                // A yieldable object is returned that can be used to wait for the end of the animation in a coroutine.
+
+                 mapRenderer.SetMapScene(new MapSceneOfLocationAndZoomLevel(location.Point, 6), MapSceneAnimationKind.Bow, 5.0f);
+
+                // wait until the map scene is set
+                StartCoroutine(AnimateMapAndHighlightLocation(mapRenderer, location));
+
             }
         }
 
@@ -97,6 +116,47 @@ public class SearchHandler : MonoBehaviour
         // clear the input field
         _inputField.text = "";
 
+
+    }
+
+    private IEnumerator AnimateMapAndHighlightLocation(MapRenderer mapRenderer, MapLocation location)
+    {
+        // Start the animation
+        var animation = mapRenderer.SetMapScene(new MapSceneOfLocationAndZoomLevel(location.Point, 6), MapSceneAnimationKind.Bow, 5.0f);
+
+        // Wait for the animation to complete
+        yield return animation;
+
+        // Now you can execute more code after the animation is finished
+        Debug.Log("Animation is complete!");
+
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
+        Debug.Log("nearest airport: " + nearestObj.airportName);
+
+        float distance = Vector3.Distance(nearestObj.transform.position, worldPos);
+
+        string message = "Airport Name: " + nearestObj.airportName + "\n" +
+                         "Airport Code: " + nearestObj.airportCode + "\n" +
+                         "Average Delay: " + nearestObj.avgDelay + "\n" +
+                         "Distance: " + distance + "\n" +
+                         "Type: " + nearestObj.airportType;
+
+        Debug.Log(distance);
+
+        if (distance < 1.0005)
+        {
+            // Show tooltip
+            TooltipManager._instance.SetAndShowTooltip(message);
+        }
+        else
+        {
+            // Hide tooltip
+            TooltipManager._instance.HideTooltip();
+        }
+
+        // highlight the nearestobj by changing the color to black
+        nearestObj.GetComponent<SpriteRenderer>().color = Color.black;
 
     }
 }

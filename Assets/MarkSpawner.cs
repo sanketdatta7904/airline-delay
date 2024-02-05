@@ -228,5 +228,13 @@ public static void FilterAirportsByType(string airportType)
     }
 }
 
+    public static Vector3 getRelativePosition(double latitude, double longitude)
+    {
+        var x = CoordinatConverter.NormalizeLatitudeWebMercator(latitude, mapZoom);
+        var y = CoordinatConverter.NormalizeLongitudeWebMercator(longitude, mapZoom);
+        return new Vector3((float)x, (float)y, 0.0f);
+    }
+
+
 
 }
