@@ -25,64 +25,75 @@ public class MarkSpawner : MonoBehaviour
     private static string selectedAirportType = "All";
     private static float selectedAvgDelay = 1;
     private static string selectedAirportName = "";
+    
 
     public InputField airportNameInput;
+    public InputField countrySearchInput; 
+    public string countryName = "";
+       private static string selectedCountryName = ""; 
 
-    void Start()
-    {
-        updateLocation();
 
-        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
-        Debug.Log(dbPath);
 
-        IDbConnection dbConnection = null;
+void Start()
+{
+    updateLocation();
 
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+    string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+    Debug.Log(dbPath);
+
+    IDbConnection dbConnection = null;
+
+    #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         dbConnection = new System.Data.SQLite.SQLiteConnection(dbPath);
-#endif
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+    #endif
+    #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         dbConnection = new Mono.Data.Sqlite.SqliteConnection(dbPath);
-#endif
+    #endif
 
-        try
+    try
+    {
+        dbConnection.Open();
+        string query = "SELECT * FROM aggregated_delays";
+        IDbCommand dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = query;
+
+        IDataReader reader = dbCommand.ExecuteReader();
+        while (reader.Read())
         {
-            dbConnection.Open();
-            string query = "SELECT * FROM aggregated_delays";
-            IDbCommand dbCommand = dbConnection.CreateCommand();
-            dbCommand.CommandText = query;
+            string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
+            string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
+            string airportType = DBNull.Value.Equals(reader["ades_type"]) ? string.Empty : reader["ades_type"].ToString();
+            double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
+            double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
+            double avgDelay = DBNull.Value.Equals(reader["avg_delay"]) ? 0.0 : Convert.ToDouble(reader["avg_delay"]);
 
-            IDataReader reader = dbCommand.ExecuteReader();
-            while (reader.Read())
+            // Update the class-level countryName instead
+            countryName = DBNull.Value.Equals(reader["country"]) ? string.Empty : reader["country"].ToString();
+
+            string sizeString = airportType == "large_airport" ? "large" : airportType == "medium_airport" ? "medium" : airportType == "small_airport" ? "small" : "other";
+
+            if ((selectedAirportType == "All" || airportType == selectedAirportType) &&
+                (selectedAvgDelay == 1 || (avgDelay >= selectedAvgDelay && avgDelay <= 10)))
             {
-                string airportCode = DBNull.Value.Equals(reader["airport_code"]) ? string.Empty : reader["airport_code"].ToString();
-                string airportName = DBNull.Value.Equals(reader["airport_name"]) ? string.Empty : reader["airport_name"].ToString();
-                string airportType = DBNull.Value.Equals(reader["ades_type"]) ? string.Empty : reader["ades_type"].ToString();
-                double latitude = DBNull.Value.Equals(reader["latitude"]) ? 0.0 : Convert.ToDouble(reader["latitude"]);
-                double longitude = DBNull.Value.Equals(reader["longitude"]) ? 0.0 : Convert.ToDouble(reader["longitude"]);
-                double avgDelay = DBNull.Value.Equals(reader["avg_delay"]) ? 0.0 : Convert.ToDouble(reader["avg_delay"]);
-
-                string sizeString = airportType == "large_airport" ? "large" : airportType == "medium_airport" ? "medium" : airportType == "small_airport" ? "small" : "other";
-
-                if ((selectedAirportType == "All" || airportType == selectedAirportType) &&
-                    (selectedAvgDelay == 1 || (avgDelay >= selectedAvgDelay && avgDelay <= 10)))
-                {
-                    SpawnMarkAtLatLong(latitude, longitude, airportName, airportCode, sizeString, avgDelay, airportType);
-                }
+                SpawnMarkAtLatLong(latitude, longitude, airportName, airportCode, sizeString, avgDelay, airportType);
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error executing query: {e.Message}");
-        }
-        finally
-        {
-            if (dbConnection != null && dbConnection.State == ConnectionState.Open)
-                dbConnection.Close();
-        }
-
-        airportNameInput.onValueChanged.AddListener(OnAirportNameInputChange);
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"Error executing query: {e.Message}");
+    }
+    finally
+    {
+        if (dbConnection != null && dbConnection.State == ConnectionState.Open)
+            dbConnection.Close();
     }
 
+    airportNameInput.onValueChanged.AddListener(OnAirportNameInputChange);
+    countrySearchInput.onValueChanged.AddListener(OnCountrySearchInputChange);
+}
+
+  
     void Update()
     {
         bool zoomChanged = mapZoom != map.GetComponent<MapRenderer>().ZoomLevel;
@@ -126,6 +137,7 @@ public class MarkSpawner : MonoBehaviour
         markInstance.GetComponent<PointScript>().longitude = longitude;
         markInstance.GetComponent<PointScript>().airportName = airportName;
         markInstance.GetComponent<PointScript>().airportCode = airportCode;
+        markInstance.GetComponent<PointScript>().countryName = countryName;
         markInstance.GetComponent<PointScript>().size = size;
         markInstance.GetComponent<PointScript>().airportType = airportType;
         markInstance.GetComponent<PointScript>().avgDelay = avgDelay;
@@ -154,20 +166,23 @@ public class MarkSpawner : MonoBehaviour
         selectedAirportType = airportType;
     }
 
-    public static void FilterAirportsByAvgDelay(float avgDelay)
+public static void FilterAirportsByAvgDelay(float avgDelay)
+{
+    selectedAvgDelay = avgDelay;
+
+    foreach (PointScript point in allPointsKd)
     {
-        selectedAvgDelay = avgDelay;
+        float pointAvgDelay = (float)point.avgDelay;
 
-        foreach (PointScript point in allPointsKd)
-        {
-            float pointAvgDelay = (float)point.avgDelay;
+        // Check if the point should be visible based on both airport type, average delay, and country name
+        bool shouldShow = (selectedAirportType == "All" || point.airportType == selectedAirportType) &&
+                          (selectedAvgDelay == -1f || (pointAvgDelay >= selectedAvgDelay && pointAvgDelay <= 100f)) &&
+                          (string.IsNullOrEmpty(selectedCountryName) || point.countryName.Equals(selectedCountryName, StringComparison.OrdinalIgnoreCase));
 
-            point.gameObject.SetActive(
-                (selectedAirportType == "All" || point.airportType == selectedAirportType) &&
-                (selectedAvgDelay == -1f || (pointAvgDelay >= selectedAvgDelay && pointAvgDelay <= 100f))
-            );
-        }
+        point.gameObject.SetActive(shouldShow);
     }
+}
+
 
     private void OnAirportNameInputChange(string value)
     {
@@ -196,6 +211,24 @@ public class MarkSpawner : MonoBehaviour
             point.transform.localScale = new Vector3(sizeScale, sizeScale, sizeScale);
         }
     }
+
+    // Method to handle changes in the country search input field
+private void OnCountrySearchInputChange(string value)
+{
+    // Update the class-level variable instead of declaring a new local variable
+    selectedCountryName = value;
+
+    foreach (PointScript point in allPointsKd)
+    {
+        // Check if the point should be visible based on both airport type, average delay, and country name
+        bool shouldShow = (selectedAirportType == "All" || point.airportType == selectedAirportType) &&
+                          (selectedAvgDelay == -1 || (point.avgDelay >= selectedAvgDelay && point.avgDelay <= 100)) &&
+                          (string.IsNullOrEmpty(selectedCountryName) || point.countryName.Equals(selectedCountryName, StringComparison.OrdinalIgnoreCase));
+
+        point.gameObject.SetActive(shouldShow);
+    }
+}
+
 
     private float GetSizeScale(string airportType)
     {
