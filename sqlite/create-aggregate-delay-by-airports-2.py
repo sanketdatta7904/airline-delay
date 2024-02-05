@@ -4,7 +4,7 @@ import sqlite3
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation.db' 
+sqlite_db_path = 'D:/sqlite/aviation_new.db'
 
 
 
@@ -17,13 +17,14 @@ CREATE TABLE IF NOT EXISTS aggregated_delays (
     ades_type TEXT,
     latitude REAL,
     longitude REAL,
-    avg_delay REAL
+    avg_delay REAL,
+    country TEXT
 );
 """
 
 query_insert_data = """
-INSERT INTO aggregated_delays (airport_code, airport_name,ades_type,latitude,longitude, avg_delay)
-SELECT ADES, ades_name,ades_type, "ADES Latitude", "ADES Longitude", AVG(`delay (minutes)`) AS avg_delay FROM flights_data GROUP BY ADES;
+INSERT INTO aggregated_delays (airport_code, airport_name,ades_type,latitude,longitude, avg_delay, country)
+SELECT ADES, ades_name,ades_type, "ADES Latitude", "ADES Longitude", AVG(`delay (minutes)`) AS avg_delay, ades_country FROM flights_data GROUP BY ADES;
 """
 
 cursor = conn.cursor()

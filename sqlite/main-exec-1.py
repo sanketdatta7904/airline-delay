@@ -12,7 +12,7 @@ airport_data = pd.read_csv('D:/sqlite/airport code and names/airport-codes_csv.c
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation.db'  
+sqlite_db_path = 'D:/sqlite/aviation_new.db'  
 
 # connection to the SQLite database
 conn = sqlite3.connect(sqlite_db_path)
@@ -28,12 +28,18 @@ def table_exists():
     cursor.execute(query)
     return cursor.fetchone() is not None
 
+country_data = pd.read_csv('D:/sqlite/airport code and names/country_code_to_name.csv')
+country_mapping = country_data.set_index('alpha-2')['name'].to_dict()
 
 # Create an object to map airport codes to names and types
 airport_mapping = {}
 for index, row in airport_data.iterrows():
-    airport_mapping[row['gps_code']] = {'name': row['name'], 'type': row['type']}
-
+    country_name = country_mapping.get(row['iso_country'], '')
+    airport_mapping[row['gps_code']] = {
+        'name': row['name'],
+        'type': row['type'],
+        'country': country_name
+    }
 # print(airport_mapping)
 
 append_flag = False
@@ -60,9 +66,14 @@ while(end_of_files != True):
                 
             data['adep_type'] = data['ADEP'].map(lambda x: airport_mapping[x]['type'] if x in airport_mapping else '')
             data['ades_type'] = data['ADES'].map(lambda x: airport_mapping[x]['type'] if x in airport_mapping else '')
+            
+            # Adding country name
+            data['adep_country'] = data['ADEP'].map(lambda x: airport_mapping[x]['country'] if x in airport_mapping else '')
+            data['ades_country'] = data['ADES'].map(lambda x: airport_mapping[x]['country'] if x in airport_mapping else '')
+            
             time_format = '%d-%m-%Y %H:%M:%S'
 
-            data['delay (minutes)'] = (datetime.strptime(data['ACTUAL ARRIVAL TIME'][0], time_format) - datetime.strptime(data['FILED ARRIVAL TIME'][0], time_format)).total_seconds() / 60
+            data['delay (minutes)'] = round((datetime.strptime(data['ACTUAL ARRIVAL TIME'][0], time_format) - datetime.strptime(data['FILED ARRIVAL TIME'][0], time_format)).total_seconds() / 60, 4)
             # Write the data to the SQLite database with header included
             data.to_sql('flights_data', conn, if_exists='replace', index=False)
             append_flag = True
@@ -84,7 +95,12 @@ while(end_of_files != True):
                 
                 data['adep_type'] = data['ADEP'].map(lambda x: airport_mapping[x]['type'] if x in airport_mapping else '')
                 data['ades_type'] = data['ADES'].map(lambda x: airport_mapping[x]['type'] if x in airport_mapping else '')
-                data['delay (minutes)'] = (datetime.strptime(data['ACTUAL ARRIVAL TIME'][0], time_format) - datetime.strptime(data['FILED ARRIVAL TIME'][0], time_format)).total_seconds() / 60
+                
+                # Adding country name
+                data['adep_country'] = data['ADEP'].map(lambda x: airport_mapping[x]['country'] if x in airport_mapping else '')
+                data['ades_country'] = data['ADES'].map(lambda x: airport_mapping[x]['country'] if x in airport_mapping else '')
+            
+                data['delay (minutes)'] = round((datetime.strptime(data['ACTUAL ARRIVAL TIME'][0], time_format) - datetime.strptime(data['FILED ARRIVAL TIME'][0], time_format)).total_seconds() / 60, 4)
                 # Append the data to the existing table in the SQLite database
                 data.to_sql('flights_data', conn, if_exists='append', index=False)
                 print("Uploaded file and appended", file)

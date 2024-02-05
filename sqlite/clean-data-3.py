@@ -4,7 +4,7 @@ import sqlite3
 
 
 # SQLite database file path
-sqlite_db_path = 'D:/sqlite/aviation.db' 
+sqlite_db_path = 'D:/sqlite/aviation_new.db'
 
 
 

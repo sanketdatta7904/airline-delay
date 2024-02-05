@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('D:/sqlite/aviation.db')
+conn = sqlite3.connect('D:/sqlite/aviation_new.db')
 
 
 create_index_queries = [
