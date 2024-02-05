@@ -6,7 +6,7 @@ using System.Data;
 
 public class DB : MonoBehaviour
 {
-    private string dbName = "URI=file:Aviation111.db";
+    private string dbName = "URI=file:" + "D:/sqlite/aviation_new.db";
     // Start is called before the first frame update
     void Start()
     {

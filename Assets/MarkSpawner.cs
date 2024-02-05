@@ -32,7 +32,7 @@ public class MarkSpawner : MonoBehaviour
     {
         updateLocation();
 
-        string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
         Debug.Log(dbPath);
 
         IDbConnection dbConnection = null;

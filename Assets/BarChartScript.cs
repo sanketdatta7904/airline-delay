@@ -27,7 +27,7 @@ void Start()
 void FetchAvgDelayData()
 {
     // Use the same database connection code as in your MarkSpawner script
-    string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db";
+    string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
     IDbConnection dbConnection = new SQLiteConnection(dbPath);
 #endif

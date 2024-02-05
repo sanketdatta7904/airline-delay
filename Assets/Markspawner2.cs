@@ -3,7 +3,6 @@ using Microsoft.Maps.Unity;
 using System;
 using System.Data;
 using System.Collections.Generic;
-using TMPro;
 
 // using System.Data.SQLite;
 using UnityEngine.UI;
@@ -18,7 +17,7 @@ using System.Data.SQLite;
     using Mono.Data.Sqlite;
 #endif
 
-public class MarkSpawner1 : MonoBehaviour
+public class MarkSpawner2 : MonoBehaviour
 {
 
     public Material Greencolor;
@@ -52,15 +51,6 @@ public class MarkSpawner1 : MonoBehaviour
 
     private float lineRendererWidth = 0.001f;
     private float benzierCurve = 0.2f;
-    public TMP_Dropdown countryDropdownList; // Assign in Inspector
-
-    public TMP_Dropdown YearDropdown;
-
-    public Button SearchButton;
-
-    public string selectedCountry;
-
-    public string selectedYear;
 
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
@@ -90,143 +80,6 @@ public class MarkSpawner1 : MonoBehaviour
 
     void Start()
     {
-        PopulateCountryDropdown();
-        countryDropdownList.onValueChanged.AddListener(UpdateSelectedCountry);
-        YearDropdown.onValueChanged.AddListener(delegate { UpdateSelectedYear(); });
- GameObject SearchButtonObj = GameObject.Find("SearchButton");
-        if (SearchButtonObj != null)
-        {
-            SearchButton = SearchButtonObj.GetComponent<Button>();
-        }
-        else
-        {
-            Debug.LogError("Dropdown GameObject not found.");
-        }
-        SearchButton.onClick.AddListener(OnSearchButtonClicked);
-    }
-    // private void CountryDropdownValueChanged(int index)
-    // {
-
-    //     string selectedCountry = countryDropdownList.options[index].text;
-    //     if (selectedCountry == "Source Country")
-    //     {
-    //         ClearExistingRoutes();
-    //         return;
-    //     }  // Skip if the default option is selected
-
-    //     ClearExistingRoutes(); // Implement this method to clear existing lines and markers from the map
-    //     FetchAndDrawRoutesForCountry(selectedCountry);
-    // }
-    void UpdateSelectedCountry(int index)
-    {
-        selectedCountry = countryDropdownList.options[index].text;
-        Debug.Log("Selected country: " + selectedCountry);
-    }
-
-    void UpdateSelectedYear()
-    {
-        selectedYear = YearDropdown.options[YearDropdown.value].text;
-        Debug.Log("Selected year: " + selectedYear);
-    }
-    void OnSearchButtonClicked()
-    {
-        string selectedCountry = countryDropdownList.options[countryDropdownList.value].text;
-        string selectedYear = YearDropdown.options[YearDropdown.value].text;
-
-        if (selectedCountry == "Source Country" || selectedYear == "Year")
-        {
-            Debug.Log("Please select both a country and a year before searching.");
-            return;
-        }
-
-        // Perform your search logic here using selectedCountry and selectedYear
-        FetchAndDrawRoutesForCountryAndYear(selectedCountry, selectedYear);
-    }
-
-    void ClearExistingRoutes()
-    {
-        // Example: Destroy all children of the parent GameObject that holds the markers and lines
-        foreach (var endpoint in lineRendererEndpoints)
-        {
-            if (endpoint.StartMarker != null) Destroy(endpoint.StartMarker);
-            if (endpoint.EndMarker != null) Destroy(endpoint.EndMarker);
-            if (endpoint.LineRenderer != null) Destroy(endpoint.LineRenderer.gameObject); // Assuming LineRenderer is attached to a GameObject
-        }
-
-        // Clear any stored references if necessary
-        lineRendererEndpoints.Clear();
-        allPointsKd.Clear(); // Clear the KD-tree or reinitialize it
-        routeDataMap.Clear();
-
-        foreach (Transform child in parent.transform)
-        {
-            Destroy(child.gameObject);
-        }
-    }
-    void PopulateCountryDropdown()
-    {
-        // Assuming you have a method to get country names from your database or a predefined list
-        string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
-        // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
-        // either use SQLite on windows platform or Sqlite on macOS platform
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-        IDbConnection dbConnection = new SQLiteConnection(dbPath);
-#endif
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-            IDbConnection dbConnection = new SqliteConnection(dbPath);
-#endif
-        List<string> countryNames = new List<string>();
-        dbConnection.Open();
-        string query = "SELECT DISTINCT country FROM aggregated_delays WHERE length(country) > 0 ORDER BY country ASC;";
-        IDbCommand dbCommand = dbConnection.CreateCommand();
-        dbCommand.CommandText = query;
-
-        IDataReader reader = dbCommand.ExecuteReader();
-        countryNames.Add("Source Country");
-        while (reader.Read())
-        {
-            countryNames.Add(DBNull.Value.Equals(reader["country"]) ? string.Empty : reader["country"].ToString());
-        }
-        GameObject dropdownObject = GameObject.Find("DropdownCountry");
-        if (dropdownObject != null)
-        {
-            countryDropdownList = dropdownObject.GetComponent<TMP_Dropdown>();
-            if (countryDropdownList != null)
-            {
-                countryDropdownList.AddOptions(countryNames);
-                countryDropdownList.value = 0; // Set to default option
-                countryDropdownList.RefreshShownValue();
-                // foreach (var item in countryNames)
-                // {
-                //     countryDropdownList.options.Add(new TMP_Dropdown.OptionData() { text = item });
-                // }
-                // Populate dropdown
-            }
-            else
-            {
-                Debug.LogError("Dropdown component not found on the object.");
-            }
-        }
-        else
-        {
-            Debug.LogError("Dropdown GameObject not found.");
-        }
-
-         GameObject yearDropdown = GameObject.Find("DropdownYear");
-        if (yearDropdown != null)
-        {
-            YearDropdown = yearDropdown.GetComponent<TMP_Dropdown>();
-        }
-        else
-        {
-            Debug.LogError("Dropdown GameObject not found.");
-        }
-
-    }
-
-
-    void FetchAndDrawRoutesForCountryAndYear(string countryName, string year)
-    {
         updateLocation();
 
         string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
@@ -244,9 +97,42 @@ public class MarkSpawner1 : MonoBehaviour
         {
             dbConnection.Open();
 
+            // Load reachability data
+            string queryReachability = "SELECT source_airport_id, destination_airport_ids FROM airport_reachability";
+            IDbCommand commandReachability = dbConnection.CreateCommand();
+            commandReachability.CommandText = queryReachability;
+            using (IDataReader reader1 = commandReachability.ExecuteReader())
+            {
+                while (reader1.Read())
+                {
+                    string source = reader1.GetString(0);
+                    string destination = reader1.GetString(1);
 
+                    if (!airportReachabilityMap.ContainsKey(source))
+                    {
+                        airportReachabilityMap[source] = new List<string>();
+                    }
+                    airportReachabilityMap[source].Add(destination);
+                }
+            }
 
-            string query = $"SELECT * FROM route_delay_quarterly WHERE Source_country='{countryName}' AND Year = '{year}'";
+            // Load airport location data
+            string queryLocations = "SELECT airport_code, airport_name, latitude, longitude FROM aggregated_delays";
+            IDbCommand commandLocations = dbConnection.CreateCommand();
+            commandLocations.CommandText = queryLocations;
+            using (IDataReader reader2 = commandLocations.ExecuteReader())
+            {
+                while (reader2.Read())
+                {
+                    string code = reader2.GetString(0);
+                    string name = reader2.GetString(1);
+                    double lat = reader2.GetDouble(2);
+                    double lon = reader2.GetDouble(3);
+                    airportLocationMap[code] = (name, lat, lon);
+                }
+            }
+
+            string query = "SELECT * FROM route_delay_quarterly WHERE Source_country='Finland' AND Year = 2015";
             IDbCommand dbCommand = dbConnection.CreateCommand();
             dbCommand.CommandText = query;
 
@@ -286,6 +172,7 @@ public class MarkSpawner1 : MonoBehaviour
                     routeDataMap[standardizedRouteID] = existingData;
                 }
             }
+            searchRoutesButton.onClick.AddListener(FindAndDisplayRoutes);
 
         }
         catch (Exception e)
@@ -306,6 +193,121 @@ public class MarkSpawner1 : MonoBehaviour
             SpawnMarkAtLatLong(route.Key, route.Value.SourceLatitude, route.Value.SourceLongitude, route.Value.DestLatitude, route.Value.DestLongitude, route.Value.AverageDelay, route.Value.TrafficCount);
         }
     }
+    private void FindAndDisplayRoutes()
+    {
+        // Get the source and destination airport codes from the input fields
+        string sourceAirport = sourceAirportInputField.text;
+        string destinationAirport = destinationAirportInputField.text;
+
+        // Validate inputs...
+
+        // Clear existing routes on the map
+        ClearExistingRoutes();
+
+        // Find direct routes and one-hop routes
+        FindDirectRoutes(sourceAirport, destinationAirport);
+        // FindOneHopRoutes(sourceAirport, destinationAirport);
+    }
+
+    private void ClearExistingRoutes()
+    {
+        // Destroy all line renderer objects
+        foreach (var endpoint in lineRendererEndpoints)
+        {
+            if (endpoint.LineRenderer != null)
+            {
+                Destroy(endpoint.LineRenderer.gameObject);
+            }
+            if (endpoint.StartMarker != null)
+            {
+                Destroy(endpoint.StartMarker);
+            }
+            if (endpoint.EndMarker != null)
+            {
+                Destroy(endpoint.EndMarker);
+            }
+        }
+        // Clear the list after destroying the GameObjects
+        lineRendererEndpoints.Clear();
+
+        // Optionally, clear markers if they are not reused for new routes
+        // This might involve clearing or resetting your KD-Tree or other data structures tracking markers
+    }
+
+    private void FindDirectRoutes(string source, string destination)
+    {
+        if (airportReachabilityMap.TryGetValue(source, out List<string> destinations) && destinations.Contains(destination))
+        {
+            // Direct route exists, get locations
+            (string sourceName, double sourceLat, double sourceLon) = airportLocationMap[source];
+            (string destName, double destLat, double destLon) = airportLocationMap[destination];
+
+            // Use your existing method to spawn markers and draw routes
+            SpawnMarkAtLatLong($"{source}-{destination}", sourceLat, sourceLon, destLat, destLon, 0, 0); // Adjust parameters as needed
+        }
+        else
+        {
+            Debug.LogError($"No direct route found from {source} to {destination}.");
+        }
+    }
+
+    //     private void FindOneHopRoutes(string source, string destination)
+    //     {
+    //         // This method requires more complex database queries or multiple queries
+    //         // to find intermediate airports. This is a simplified conceptual approach.
+
+    //         // First, find all destinations from the source
+    //         var possibleHops = new List<string>(); // This will store intermediate airports
+    //         string dbPath = "URI=file:" + "D:/sqlite/aviation_new.db";
+    //         // string dbPath = "D:/APVE23-24/Group%2/aviation.db";
+    //         // either use SQLite on windows platform or Sqlite on macOS platform
+    // #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+    //         IDbConnection dbConnection = new SQLiteConnection(dbPath);
+    // #endif
+    // #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+    //             IDbConnection dbConnection = new SqliteConnection(dbPath);
+    // #endif
+    //         try
+    //         {
+    //             dbConnection.Open();
+    //             string findHopsQuery = $"SELECT DISTINCT DestinationAirport FROM Routes WHERE SourceAirport = '{source}' AND DestinationAirport != '{destination}'";
+    //             IDbCommand findHopsCommand = dbConnection.CreateCommand();
+    //             findHopsCommand.CommandText = findHopsQuery;
+    //             using (IDataReader reader = findHopsCommand.ExecuteReader())
+    //             {
+    //                 while (reader.Read())
+    //                 {
+    //                     possibleHops.Add(reader["DestinationAirport"].ToString());
+    //                 }
+    //             }
+
+    //             // Then, for each possible intermediate hop, check if there's a route to the destination
+    //             foreach (var hop in possibleHops)
+    //             {
+    //                 string findConnectingFlightsQuery = $"SELECT * FROM Routes WHERE SourceAirport = '{hop}' AND DestinationAirport = '{destination}'";
+    //                 IDbCommand findConnectingFlightsCommand = dbConnection.CreateCommand();
+    //                 findConnectingFlightsCommand.CommandText = findConnectingFlightsQuery;
+    //                 using (IDataReader reader = findConnectingFlightsCommand.ExecuteReader())
+    //                 {
+    //                     while (reader.Read())
+    //                     {
+    //                         // Assuming you have a method to parse and draw these routes
+    //                         // You would need to draw two routes: source -> hop, hop -> destination
+    //                         // This is a simplified example, adjust according to your data schema and drawing methods
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         catch (Exception e)
+    //         {
+    //             Debug.LogError($"Database error: {e.Message}");
+    //         }
+    //         finally
+    //         {
+    //             dbConnection.Close();
+    //         }
+    //     }
+
 
     void AnalyzeAverageDelays()
     {
