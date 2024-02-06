@@ -76,3 +76,7 @@ crashlytics-build.properties
 
 # intellij idea
 .idea
+
+
+#mac specific
+.DS_Store
