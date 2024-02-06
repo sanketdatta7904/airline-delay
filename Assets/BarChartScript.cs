@@ -66,12 +66,16 @@ void FetchAvgDelayData()
 
         while (reader.Read())
         {
+                // add the average delay to the dataList
             object avgDelayObject = reader["avg_delay"];
             float avgDelay = (avgDelayObject != DBNull.Value) ? Convert.ToSingle(avgDelayObject) : 0f;
             dataList.Add(Mathf.Abs(avgDelay)); // Take the absolute value
 
+                // add the airport name to the airportNamesList
             object airportNameObject = reader["airport_name"];
             airportNamesList.Add((airportNameObject != DBNull.Value) ? Convert.ToString(airportNameObject) : "");
+
+                // add the year to the yearList
         }
 
         data = dataList.ToArray();
@@ -123,6 +127,20 @@ void CreateBars()
         RectTransform barInstance = Instantiate(barPrefab, chartContainer);
         barInstance.sizeDelta = new Vector2(barWidth, 0f);
         barInstance.anchoredPosition = new Vector2(xPos, yPos);
+
+            // add the BarChartScript component to each game object
+            BarChartElementScript script = barInstance.gameObject.AddComponent<BarChartElementScript>();
+            script.airportName = airportNames[i];
+            script.avgDelay = data[i];
+
+            //add Rigidbody2D component and set the gravity scale to 0
+            Rigidbody2D rb = barInstance.gameObject.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            
+            // add BoxCollider2D component
+            BoxCollider2D bc = barInstance.gameObject.AddComponent<BoxCollider2D>();
+            bc.size = new Vector2(barWidth, Mathf.Abs(data[i]));
+
 
         // Set the color of the bar based on the delay value
         Image barImage = barInstance.GetComponent<Image>();
