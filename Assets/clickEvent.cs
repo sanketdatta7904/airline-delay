@@ -14,13 +14,40 @@ using Mono.Data.Sqlite;
 
 public class clickEvent : MonoBehaviour
 {
+    public GameObject SearchPanel;
 
 
-void OnMouseDown()
-{
-    Debug.Log("Mouse down");
-    Vector3 mousePos = Input.mousePosition;
-    Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+    void OnMouseDown()
+    {
+        BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
+
+
+        Debug.Log("Mouse down at: " + Input.mousePosition);
+        Vector3 mousePos = Input.mousePosition;
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+
+        // we dont want to allow the user to click on the search panel
+        var widthSearchPanel = SearchPanel.GetComponent<RectTransform>().rect.width;
+        var scaleSearchPanel = SearchPanel.transform.localScale.x;
+
+        if(mousePos.x < widthSearchPanel * scaleSearchPanel)
+         {
+            Debug.Log("Clicked on the search panel");
+            // Hide tooltip
+            TooltipManager._instance.HideTooltip();
+
+            // Hide subtitle
+            barChart.HideSubtitle();
+
+            // Update chart data for the top 5 delays
+            UpdateTop5Delays(barChart);
+
+            // Update chart title to "Top-5 Delay-Prone Airports"
+            UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
+                return;
+
+        }
+    
 
     PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
 
@@ -34,7 +61,6 @@ void OnMouseDown()
 
     Debug.Log(distance);
 
-    BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
 
     if (distance < 1.0005)
     {
