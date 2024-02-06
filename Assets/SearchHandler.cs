@@ -18,33 +18,6 @@ public class SearchHandler : MonoBehaviour
     public GameObject markLayer;
     public GameObject highlightPrefab;
 
-
-
-    public async void OnSearch()
-    {
-        if (MapSession.Current == null || string.IsNullOrWhiteSpace(MapSession.Current.DeveloperKey))
-        {
-            return;
-        }
-
-        var searchText = _inputField.text;
-        var result = await MapLocationFinder.FindLocations(searchText);
-        if (result.Locations.Count > 0)
-        {
-            var location = result.Locations[0];
-            var mapRenderer = GetComponent<MapRenderer>();
-            mapRenderer.SetMapScene(new MapSceneOfLocationAndZoomLevel(location.Point, 6), MapSceneAnimationKind.Bow, 5.0f);
-        }
-        // we want to display the search results in a dropdown menu and allow the user to select one
-
-        //clear the dropdown
-        _dropdown.ClearOptions();
-        for (int i = 0; i < result.Locations.Count; i++)
-        {
-            _dropdown.options.Add(new TMP_Dropdown.OptionData(result.Locations[i].Address.FormattedAddress));
-        }
-    }
-
     // this method sets the dropdown values based on the entered search text
     public async void OnSearchDropdown()
     {
@@ -75,7 +48,7 @@ public class SearchHandler : MonoBehaviour
     }   
 
     // get the selected value from the dropdown and set the map scene to the selected location
-    public async void OnDropdownValueChanged()
+    public async void OnSearch()
     {
         if (MapSession.Current == null || string.IsNullOrWhiteSpace(MapSession.Current.DeveloperKey))
         {
