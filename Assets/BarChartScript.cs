@@ -96,171 +96,6 @@ void FetchAvgDelayData()
 
 
 
-// void CreateBars()
-// {
-//     // Clear existing bars
-//     foreach (Transform child in chartContainer)
-//     {
-//         Destroy(child.gameObject);
-//     }
-
-//     if (barPrefab == null || chartContainer == null || axisDrawer == null)
-//     {
-//         Debug.LogError("Assign barPrefab, chartContainer, and axisDrawer");
-//         return;
-//     }
-
-//     float axisLengthY = axisDrawer.axisLengthY;
-
-//     float totalWidth = (barWidth + spacing) * (data.Length + 2) - spacing;
-//     float startX = -totalWidth / 2f;
-
-//     // Calculate the total height of the bars
-//     float totalHeight = data.Max();
-
-//     // Adjust yPos for all bars to align bottoms to Y = 0
-//     for (int i = 0; i < data.Length; i++)
-//     {
-//         float xPos = startX + i * (barWidth + spacing);
-//         float yPos = -axisLengthY / 2f + Mathf.Abs(data[i]) / 2f; // Use absolute value to align bottoms to Y = 0
-
-//         RectTransform barInstance = Instantiate(barPrefab, chartContainer);
-//         barInstance.sizeDelta = new Vector2(barWidth, 0f);
-//         barInstance.anchoredPosition = new Vector2(xPos, yPos);
-
-//             // add the BarChartScript component to each game object
-//             BarChartElementScript script = barInstance.gameObject.AddComponent<BarChartElementScript>();
-//             script.airportName = airportNames[i];
-//             script.avgDelay = data[i];
-
-//             //add Rigidbody2D component and set the gravity scale to 0
-//             Rigidbody2D rb = barInstance.gameObject.AddComponent<Rigidbody2D>();
-//             rb.gravityScale = 0;
-            
-//             // add BoxCollider2D component
-//             BoxCollider2D bc = barInstance.gameObject.AddComponent<BoxCollider2D>();
-//             bc.size = new Vector2(barWidth, Mathf.Abs(data[i]));
-
-
-//         // Set the color of the bar based on the delay value
-//         Image barImage = barInstance.GetComponent<Image>();
-//         if (barImage != null)
-//         {
-//             barImage.color = (data[i] < 0) ? Color.red : Color.blue;
-//         }
-
-//         // Create and set the text label under each bar
-//         GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
-//         textLabel.transform.SetParent(chartContainer);
-//         textLabel.transform.localScale = Vector3.one;
-//         textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos - 20f); // Adjusted yPos for the label
-
-//         Text labelText = textLabel.AddComponent<Text>();
-//         labelText.text = Mathf.RoundToInt(Mathf.Abs(data[i])).ToString(); // Use absolute value for the label text
-//         labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
-//         labelText.alignment = TextAnchor.MiddleCenter;
-//         labelText.color = Color.white;
-
-//         // Set the sibling index of the text label higher than the bar to ensure it renders above the bar
-//         textLabel.transform.SetSiblingIndex(barInstance.transform.GetSiblingIndex() + 1);
-
-//         // LeanTween to smoothly increase the height of the bars
-//         LeanTween.value(barInstance.gameObject, 0f, Mathf.Abs(data[i]), 1f)
-//             .setEase(LeanTweenType.easeOutQuad)
-//             .setOnUpdate((float value) =>
-//             {
-//                 barInstance.sizeDelta = new Vector2(barWidth, value);
-//             });
-//     }
-// }
-
-
-
-
-
-
-
-
-
-// void CreateBars()
-// {
-//     // Clear existing bars
-//     foreach (Transform child in chartContainer)
-//     {
-//         Destroy(child.gameObject);
-//     }
-
-//     if (barPrefab == null || chartContainer == null || axisDrawer == null)
-//     {
-//         Debug.LogError("Assign barPrefab, chartContainer, and axisDrawer");
-//         return;
-//     }
-
-//     float axisLengthY = axisDrawer.axisLengthY;
-
-//     float totalWidth = (barWidth + spacing) * (data.Length + 2) - spacing;
-//     float startX = -totalWidth / 2f;
-
-//     // Calculate the total height of the bars
-//     float totalHeight = data.Max();
-
-//     // Adjust yPos for all bars to align bottoms to Y = 0
-//     for (int i = 0; i < data.Length; i++)
-//     {
-//         float xPos = startX + i * (barWidth + spacing);
-//         float yPos = -axisLengthY / 2f + Mathf.Abs(data[i]) / 2f; // Use absolute value to align bottoms to Y = 0
-
-//         RectTransform barInstance = Instantiate(barPrefab, chartContainer);
-//         barInstance.sizeDelta = new Vector2(barWidth, 0f);
-//         barInstance.anchoredPosition = new Vector2(xPos, yPos);
-
-//         // Set the color of the bar based on the delay value
-//         Image barImage = barInstance.GetComponent<Image>();
-//         if (barImage != null)
-//         {
-//             barImage.color = (data[i] < 0) ? Color.red : Color.blue;
-//         }
-
-//         // Create and set the text label under each bar
-//         GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
-//         textLabel.transform.SetParent(chartContainer);
-//         textLabel.transform.localScale = Vector3.one;
-//         textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos - 20f); // Adjusted yPos for the label
-
-//         Text labelText = textLabel.AddComponent<Text>();
-//         labelText.text = Mathf.RoundToInt(Mathf.Abs(data[i])).ToString(); // Use absolute value for the label text
-//         labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
-//         labelText.alignment = TextAnchor.MiddleCenter;
-//         labelText.color = Color.white;
-
-//         // Set the sibling index of the text label higher than the bar to ensure it renders above the bar
-//         textLabel.transform.SetSiblingIndex(barInstance.transform.GetSiblingIndex() + 1);
-
-//         // Add the year label below each bar
-//         GameObject yearLabel = new GameObject("YearLabel", typeof(RectTransform));
-//         yearLabel.transform.SetParent(chartContainer);
-//         yearLabel.transform.localScale = Vector3.one;
-//         yearLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos - 40f); // Adjusted yPos for the year label
-
-//         Text yearText = yearLabel.AddComponent<Text>();
-//         yearText.text = (2017 + i).ToString(); // Assuming the data represents years from 2017
-//         yearText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
-//         yearText.alignment = TextAnchor.MiddleCenter;
-//         yearText.color = Color.white;
-
-//         // LeanTween to smoothly increase the height of the bars
-//         LeanTween.value(barInstance.gameObject, 0f, Mathf.Abs(data[i]), 1f)
-//             .setEase(LeanTweenType.easeOutQuad)
-//             .setOnUpdate((float value) =>
-//             {
-//                 barInstance.sizeDelta = new Vector2(barWidth, value);
-//             });
-//     }
-// }
-
-
-
-
 void CreateBars()
 {
     // Clear existing bars
@@ -293,6 +128,19 @@ void CreateBars()
         barInstance.sizeDelta = new Vector2(barWidth, 0f);
         barInstance.anchoredPosition = new Vector2(xPos, yPos);
 
+        // add the BarChartScript component to each game object
+        BarChartElementScript script = barInstance.gameObject.AddComponent<BarChartElementScript>();
+        script.airportName = airportNames[i];
+        script.avgDelay = data[i];
+
+        //add Rigidbody2D component and set the gravity scale to 0
+        Rigidbody2D rb = barInstance.gameObject.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+
+        // add BoxCollider2D component
+        BoxCollider2D bc = barInstance.gameObject.AddComponent<BoxCollider2D>();
+        bc.size = new Vector2(barWidth, Mathf.Abs(data[i]));
+
         // Set the color of the bar based on the delay value
         Image barImage = barInstance.GetComponent<Image>();
         if (barImage != null)
@@ -300,11 +148,16 @@ void CreateBars()
             barImage.color = (data[i] < 0) ? Color.red : Color.blue;
         }
 
-        // Create and set the text label under each bar
+        // Create and set the text label above each bar
         GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
         textLabel.transform.SetParent(chartContainer);
         textLabel.transform.localScale = Vector3.one;
-        textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos - 20f); // Adjusted yPos for the label
+
+        // Calculate yPos for the text label to be positioned above the bar
+        float labelYOffset = 20f; // Offset for the label above the bar
+        float labelYPos = yPos + (Mathf.Sign(data[i]) * Mathf.Abs(data[i]) / 2f) + labelYOffset;
+
+        textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, labelYPos);
 
         Text labelText = textLabel.AddComponent<Text>();
         labelText.text = Mathf.RoundToInt(Mathf.Abs(data[i])).ToString(); // Use absolute value for the label text
@@ -315,21 +168,6 @@ void CreateBars()
         // Set the sibling index of the text label higher than the bar to ensure it renders above the bar
         textLabel.transform.SetSiblingIndex(barInstance.transform.GetSiblingIndex() + 1);
 
-        // Add the year label below each bar only when the second chart (selected airport) is being displayed
-        if (!string.IsNullOrEmpty(chartSubtitle.text))
-        {
-            GameObject yearLabel = new GameObject("YearLabel", typeof(RectTransform));
-            yearLabel.transform.SetParent(chartContainer);
-            yearLabel.transform.localScale = Vector3.one;
-            yearLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos - 40f); // Adjusted yPos for the year label
-
-            Text yearText = yearLabel.AddComponent<Text>();
-            yearText.text = (2017 + i).ToString(); // Assuming the data represents years from 2017
-            yearText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
-            yearText.alignment = TextAnchor.MiddleCenter;
-            yearText.color = Color.white;
-        }
-
         // LeanTween to smoothly increase the height of the bars
         LeanTween.value(barInstance.gameObject, 0f, Mathf.Abs(data[i]), 1f)
             .setEase(LeanTweenType.easeOutQuad)
@@ -339,9 +177,6 @@ void CreateBars()
             });
     }
 }
-
-
-
 
 
 
