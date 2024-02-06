@@ -161,7 +161,7 @@ public class clickEvent : MonoBehaviour
             try
             {
                 dbConnection.Open();
-                string query = $"SELECT AVG(avg_delay) FROM airport_year_aggregated_delays WHERE airport_code = '{airportCode}' AND year = {year}";
+                string query = $"SELECT avg_delay FROM airport_year_aggregated_delays WHERE airport_code = '{airportCode}' AND year = {year}";
                 IDbCommand dbCommand = dbConnection.CreateCommand();
                 dbCommand.CommandText = query;
 
