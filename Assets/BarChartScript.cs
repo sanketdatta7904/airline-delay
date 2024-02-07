@@ -236,7 +236,7 @@ void CreateBars()
         Image barImage = barInstance.GetComponent<Image>();
         if (barImage != null)
         {
-            barImage.color = (data[i] < 0) ? Color.red : Color.blue;
+            barImage.color = (data[i] < 0) ? Color.green : Color.blue;
         }
 
         // Create and set the text label above each bar
@@ -359,6 +359,15 @@ public void AddLabelsUnderBars(string[] labels)
         labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
         labelText.alignment = TextAnchor.MiddleCenter;
         labelText.color = Color.black;
+    }
+}
+
+public static void setBarChartTopFive(bool set)
+{
+// iterate over all bars in the kd tree and set the topFive flag
+    foreach (BarChartElementScript bar in allBarsKd)
+    {
+        bar.isShowingTopFive = set;
     }
 }
 

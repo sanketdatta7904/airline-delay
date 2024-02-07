@@ -38,11 +38,7 @@ void OnMouseDown()
             BarChartElementScript nearestBar = BarChartScript.getClosestBar(mousePos);
             float distanceBar = Vector3.Distance(nearestBar.transform.position, worldPos);
             float avgDelayRounded = (float)Math.Round(nearestBar.avgDelay, 2);
-            string TooltipMessage = "Airport Name: " + nearestBar.airportName + "\n" +
-                                    "Airport Code: " + nearestBar.airportCode + "\n" +
-                                    "Year: " + nearestBar.year + "\n" +
-                                    "Average Delay: " + avgDelayRounded + "\n" +
-                                    "Distance: " + distanceBar;
+            string TooltipMessage = nearestBar.isShowingTopFive ? nearestBar.airportName + "\n" + "Average Delay: " + avgDelayRounded : nearestBar.year + "\n" + "Average Delay: " + avgDelayRounded;
             TooltipManager._instance.SetAndShowTooltip(TooltipMessage);
 
         return;
@@ -73,6 +69,10 @@ void OnMouseDown()
         // Show subtitle
         barChart.ShowSubtitle();
         barChart.AddLabelsUnderBars(new string[]{"2017", "2018", "2019", "2020", "2021"});
+
+        // set the isShowingTopFive flag to false
+        BarChartScript.setBarChartTopFive(false);
+
     }
     else
     {
@@ -90,6 +90,9 @@ void OnMouseDown()
 
         // Add labels under bars
         barChart.AddLabelsUnderBars(new string[]{"EBCV", "KBPT", "KLSF", "KTIK", "LFDM"});
+
+        // set the isShowingTopFive flag to true
+        BarChartScript.setBarChartTopFive(true);
     }
 }
 
@@ -130,7 +133,9 @@ void OnMouseDown()
 
             // Update chart with the top 5 delays
             barChart.UpdateData(newData);
+
         }
+
     }
 
     void UpdateChartTitle(string title, BarChartScript barChart)

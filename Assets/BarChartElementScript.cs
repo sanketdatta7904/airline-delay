@@ -13,6 +13,7 @@ public class BarChartElementScript : MonoBehaviour
     public float avgDelay;
     public Vector3 topLeftCorner;
     public Vector3 bottomRightCorner;
+    public bool isShowingTopFive;
     // Start is called before the first frame update
     void Start()
     {
