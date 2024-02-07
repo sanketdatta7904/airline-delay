@@ -451,7 +451,7 @@ public class MarkSpawner1 : MonoBehaviour
         parent.transform.position = new Vector3((float)-xOffSet, (float)-yOffSet, 0.0f);
     }
 
-    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, double trafficCount, string SourceAirport,string  DestAirport,string  SourceCountry,string DestCountry)
+    public void SpawnMarkAtLatLong(string RouteID, double Source_latitude, double Source_longitude, double Dest_latitude, double Dest_longitude, double avgDelay, double trafficCount, string SourceAirport, string DestAirport, string SourceCountry, string DestCountry)
     {
 
         // GameObject mark = size == "small" ? markSmall : size == "medium" ? markMedium : markLarge;
@@ -494,7 +494,7 @@ public class MarkSpawner1 : MonoBehaviour
         lineScript.averageDelay = avgDelay;
         lineScript.trafficCount = trafficCount; // Ensure trafficCount is cast to int if necessary
         lineScript.sourceAirport = SourceAirport;
-                lineScript.destAirport = DestAirport;
+        lineScript.destAirport = DestAirport;
 
         lineScript.sourceCountry = SourceCountry;
 
