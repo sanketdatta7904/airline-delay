@@ -6,7 +6,7 @@ public class AxisDrawer : MonoBehaviour
     public RectTransform xAxis;
     public RectTransform yAxis;
     public float axisLengthX = 200f;
-    public float axisLengthY = 120f;
+    public float axisLengthY = 130f;
     public float axisThickness = 1.0f;
     public float arrowheadSize = 5.0f;
 
@@ -36,7 +36,7 @@ public class AxisDrawer : MonoBehaviour
         for (int i = 20; i <= 100; i += 20)
         {
             AddDashToAxis(yAxis, new Vector2(30f, i));
-            AddTextToAxis(yAxis, i.ToString(), TextAnchor.LowerLeft, new Vector2(-57f, i + 44f), 9); // Adjust font size here
+            AddTextToAxis(yAxis, i.ToString(), TextAnchor.LowerLeft, new Vector2(-57f, i + 30f), 9); // Adjust font size here
         }
     }
 
