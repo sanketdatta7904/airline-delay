@@ -32,6 +32,15 @@ public class MarkSpawner : MonoBehaviour
     public string countryName = "";
     private static string selectedCountryName = "";
 
+    // we need to clear static data when the scene is reloaded
+    public static void clearStaticData()
+    {
+        allPointsKd.Clear();
+        selectedAirportType = "All";
+        selectedAvgDelay = 1;
+        selectedAirportName = "";
+        selectedCountryName = "";
+    }
 
 
     void Start()

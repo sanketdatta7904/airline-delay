@@ -15,6 +15,9 @@ public class SceneChanger : MonoBehaviour
 
     void ChangeScene()
     {
+        // Reinitialize or clear static data here
+        MarkSpawner.clearStaticData();
         SceneManager.LoadScene(sceneToLoad);
     }
+
 }
