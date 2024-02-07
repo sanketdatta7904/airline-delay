@@ -6,7 +6,7 @@ public class AxisDrawer : MonoBehaviour
     public RectTransform xAxis;
     public RectTransform yAxis;
     public float axisLengthX = 200f;
-    public float axisLengthY = 120f;
+    public float axisLengthY = 130f;
     public float axisThickness = 1.0f;
     public float arrowheadSize = 5.0f;
 
@@ -36,7 +36,7 @@ public class AxisDrawer : MonoBehaviour
         for (int i = 20; i <= 100; i += 20)
         {
             AddDashToAxis(yAxis, new Vector2(30f, i));
-            AddTextToAxis(yAxis, i.ToString(), TextAnchor.LowerLeft, new Vector2(-57f, i + 44f), 9); // Adjust font size here
+            AddTextToAxis(yAxis, i.ToString(), TextAnchor.LowerLeft, new Vector2(-57f, i + 30f), 9); // Adjust font size here
         }
     }
 
@@ -132,48 +132,99 @@ public class AxisDrawer : MonoBehaviour
         }
     }
 
-    void AddTextToAxis(RectTransform axis, string labelText, TextAnchor alignment, Vector2 position, int fontSize)
+    // void AddTextToAxis(RectTransform axis, string labelText, TextAnchor alignment, Vector2 position, int fontSize)
+    // {
+    //     GameObject textObject = new GameObject("AxisLabel");
+    //     RectTransform textRect = textObject.AddComponent<RectTransform>();
+    //     Text textComponent = textObject.AddComponent<Text>();
+
+    //     textComponent.text = labelText;
+
+    //     // Load the font from the system fonts
+    //     Font defaultFont = Font.CreateDynamicFontFromOSFont("Arial", fontSize);
+    //     if (defaultFont != null)
+    //     {
+    //         textComponent.font = defaultFont;
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("Failed to load default system font.");
+    //         Destroy(textObject);
+    //         return;
+    //     }
+
+    //     textComponent.fontSize = fontSize;
+    //     textComponent.alignment = alignment;
+    //     textComponent.color = Color.black;
+
+    //     // Set the position of the text
+    //     textRect.anchoredPosition = position;
+
+    //     if (axis != null && axis.parent != null)
+    //     {
+    //         textRect.SetParent(axis.parent, false);
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("Axis is null or missing parent.");
+    //         Destroy(textObject);
+    //         return;
+    //     }
+
+    //     // Set the rotation to make the text vertical
+    //     textRect.localRotation = Quaternion.Euler(0f, 0f, 90f);
+    // }
+
+
+
+void AddTextToAxis(RectTransform axis, string labelText, TextAnchor alignment, Vector2 position, int fontSize)
+{
+    GameObject textObject = new GameObject("AxisLabel");
+    RectTransform textRect = textObject.AddComponent<RectTransform>();
+    Text textComponent = textObject.AddComponent<Text>();
+
+    textComponent.text = labelText;
+
+    // Load the font from the system fonts
+    Font defaultFont = Font.CreateDynamicFontFromOSFont("Arial", fontSize);
+    if (defaultFont != null)
     {
-        GameObject textObject = new GameObject("AxisLabel");
-        RectTransform textRect = textObject.AddComponent<RectTransform>();
-        Text textComponent = textObject.AddComponent<Text>();
-
-        textComponent.text = labelText;
-
-        // Load the font from the system fonts
-        Font defaultFont = Font.CreateDynamicFontFromOSFont("Arial", fontSize);
-        if (defaultFont != null)
-        {
-            textComponent.font = defaultFont;
-        }
-        else
-        {
-            Debug.LogError("Failed to load default system font.");
-            Destroy(textObject);
-            return;
-        }
-
-        textComponent.fontSize = fontSize;
-        textComponent.alignment = alignment;
-        textComponent.color = Color.black;
-
-        // Set the position of the text
-        textRect.anchoredPosition = position;
-
-        if (axis != null && axis.parent != null)
-        {
-            textRect.SetParent(axis.parent, false);
-        }
-        else
-        {
-            Debug.LogError("Axis is null or missing parent.");
-            Destroy(textObject);
-            return;
-        }
-
-        // Set the rotation to make the text vertical
-        textRect.localRotation = Quaternion.Euler(0f, 0f, 90f);
+        textComponent.font = defaultFont;
     }
+    else
+    {
+        Debug.LogError("Failed to load default system font.");
+        Destroy(textObject);
+        return;
+    }
+
+    textComponent.fontSize = fontSize;
+    textComponent.alignment = alignment;
+    textComponent.color = Color.black;
+
+    // Set the position of the text
+    textRect.anchoredPosition = position;
+
+    if (axis != null && axis.parent != null)
+    {
+        textRect.SetParent(axis.parent, false);
+    }
+    else
+    {
+        Debug.LogError("Axis is null or missing parent.");
+        Destroy(textObject);
+        return;
+    }
+
+    // Set the rotation to make the text vertical
+    textRect.localRotation = Quaternion.Euler(0f, 0f, 90f);
+
+    // Adjust the Y position to ensure the label is above the bars
+    textRect.anchoredPosition += Vector2.up * 10f; // Adjust the value as needed
+}
+
+
+
 
     RectTransform FindAxisByName(string axisName)
     {
@@ -191,3 +242,4 @@ public class AxisDrawer : MonoBehaviour
         return null;
     }
 }
+
