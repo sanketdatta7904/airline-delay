@@ -34,15 +34,17 @@ void OnMouseDown()
         Debug.Log("Clicked on the search panel");
         // Hide tooltip
         TooltipManager._instance.HideTooltip();
+            // get closest bar
+            BarChartElementScript nearestBar = BarChartScript.getClosestBar(mousePos);
+            float distanceBar = Vector3.Distance(nearestBar.transform.position, worldPos);
+            float avgDelayRounded = (float)Math.Round(nearestBar.avgDelay, 2);
+            string TooltipMessage = "Airport Name: " + nearestBar.airportName + "\n" +
+                                    "Airport Code: " + nearestBar.airportCode + "\n" +
+                                    "Year: " + nearestBar.year + "\n" +
+                                    "Average Delay: " + avgDelayRounded + "\n" +
+                                    "Distance: " + distanceBar;
+            TooltipManager._instance.SetAndShowTooltip(TooltipMessage);
 
-        // Hide subtitle
-        barChart.HideSubtitle();
-
-        // Update chart data for the top 5 delays
-        UpdateTop5Delays(barChart);
-
-        // Update chart title to "Top-5 Delay-Prone Airports"
-        UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
         return;
 
     }

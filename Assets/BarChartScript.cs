@@ -14,6 +14,7 @@ using System.Linq;
 
 public class BarChartScript : MonoBehaviour
 {
+    private static KdTree<BarChartElementScript> allBarsKd = new KdTree<BarChartElementScript>();
     public RectTransform barPrefab;
     public RectTransform chartContainer;
     public float barWidth = 10f;
@@ -25,12 +26,18 @@ public class BarChartScript : MonoBehaviour
      private string[] airportNames;
 
        public Text chartSubtitle; // 
-      public AxisDrawer axisDrawer; 
+      public AxisDrawer axisDrawer;
+    private int[] yearList = new int[] { 2017, 2018, 2019, 2020, 2021 };
 
 
 public float axisLengthY = 135f;
+    // we need to clear static data when the scene is reloaded
+    public static void clearStaticData()
+    {
+        allBarsKd.Clear();
+    }
 
-void Start()
+        void Start()
 {
     // Fetch avg_delay data from the SQL table and assign it to the data array
     FetchAvgDelayData();
@@ -181,8 +188,9 @@ void FetchAvgDelayData()
 
 void CreateBars()
 {
-    // Clear existing bars
-    foreach (Transform child in chartContainer)
+        allBarsKd.Clear();
+        // Clear existing bars
+        foreach (Transform child in chartContainer)
     {
         Destroy(child.gameObject);
     }
@@ -215,14 +223,14 @@ void CreateBars()
         BarChartElementScript script = barInstance.gameObject.AddComponent<BarChartElementScript>();
         script.airportName = airportNames[i];
         script.avgDelay = data[i];
-
-        //add Rigidbody2D component and set the gravity scale to 0
-        Rigidbody2D rb = barInstance.gameObject.AddComponent<Rigidbody2D>();
-        rb.gravityScale = 0;
-
-        // add BoxCollider2D component
-        BoxCollider2D bc = barInstance.gameObject.AddComponent<BoxCollider2D>();
-        bc.size = new Vector2(barWidth, Mathf.Abs(data[i]));
+        script.year = yearList[i];
+            // in order to register a click on the bar, we need to remeber the top left and bottom right corners of the bar
+            // get the absolute position on the canvas
+            Vector3[] corners = new Vector3[4];
+            barInstance.GetWorldCorners(corners);
+            script.topLeftCorner = corners[1];
+            script.bottomRightCorner = corners[3];
+            allBarsKd.Add(script);
 
         // Set the color of the bar based on the delay value
         Image barImage = barInstance.GetComponent<Image>();
@@ -266,6 +274,13 @@ void CreateBars()
             });
     }
 }
+
+    public static BarChartElementScript getClosestBar(Vector3 position)
+    {
+        BarChartElementScript closestBar = allBarsKd.FindClosest(position);
+        Debug.Log("Closest bar is " + closestBar.airportName);
+        return closestBar;
+    }
 
 
 

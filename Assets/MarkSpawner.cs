@@ -26,7 +26,6 @@ public class MarkSpawner : MonoBehaviour
     private static float selectedAvgDelay = 1;
     private static string selectedAirportName = "";
 
-
     public InputField airportNameInput;
     public InputField countrySearchInput;
     public string countryName = "";

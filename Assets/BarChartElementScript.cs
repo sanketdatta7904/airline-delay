@@ -11,6 +11,8 @@ public class BarChartElementScript : MonoBehaviour
     public string airportCode;
     public int year;
     public float avgDelay;
+    public Vector3 topLeftCorner;
+    public Vector3 bottomRightCorner;
     // Start is called before the first frame update
     void Start()
     {
