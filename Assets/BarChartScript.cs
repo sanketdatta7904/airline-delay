@@ -96,6 +96,89 @@ void FetchAvgDelayData()
 
 
 
+// void CreateBars()
+// {
+//     // Clear existing bars
+//     foreach (Transform child in chartContainer)
+//     {
+//         Destroy(child.gameObject);
+//     }
+
+//     if (barPrefab == null || chartContainer == null || axisDrawer == null)
+//     {
+//         Debug.LogError("Assign barPrefab, chartContainer, and axisDrawer");
+//         return;
+//     }
+
+//     float axisLengthY = axisDrawer.axisLengthY;
+
+//     float totalWidth = (barWidth + spacing) * (data.Length + 2) - spacing;
+//     float startX = -totalWidth / 2f;
+
+//     // Calculate the total height of the bars
+//     float totalHeight = data.Max();
+
+//     // Adjust yPos for all bars to align bottoms to Y = 0
+//     for (int i = 0; i < data.Length; i++)
+//     {
+//         float xPos = startX + i * (barWidth + spacing);
+//         float yPos = -axisLengthY / 2f + Mathf.Abs(data[i]) / 2f; // Use absolute value to align bottoms to Y = 0
+
+//         RectTransform barInstance = Instantiate(barPrefab, chartContainer);
+//         barInstance.sizeDelta = new Vector2(barWidth, 0f);
+//         barInstance.anchoredPosition = new Vector2(xPos, yPos);
+
+//         // add the BarChartScript component to each game object
+//         BarChartElementScript script = barInstance.gameObject.AddComponent<BarChartElementScript>();
+//         script.airportName = airportNames[i];
+//         script.avgDelay = data[i];
+
+//         //add Rigidbody2D component and set the gravity scale to 0
+//         Rigidbody2D rb = barInstance.gameObject.AddComponent<Rigidbody2D>();
+//         rb.gravityScale = 0;
+
+//         // add BoxCollider2D component
+//         BoxCollider2D bc = barInstance.gameObject.AddComponent<BoxCollider2D>();
+//         bc.size = new Vector2(barWidth, Mathf.Abs(data[i]));
+
+//         // Set the color of the bar based on the delay value
+//         Image barImage = barInstance.GetComponent<Image>();
+//         if (barImage != null)
+//         {
+//             barImage.color = (data[i] < 0) ? Color.red : Color.blue;
+//         }
+
+//         // Create and set the text label above each bar
+//         GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
+//         textLabel.transform.SetParent(chartContainer);
+//         textLabel.transform.localScale = Vector3.one;
+
+//         // Calculate yPos for the text label to be positioned above the bar
+//         float labelYOffset = 20f; // Offset for the label above the bar
+//         float labelYPos = yPos + (Mathf.Sign(data[i]) * Mathf.Abs(data[i]) / 2f) + labelYOffset;
+
+//         textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, labelYPos);
+
+//         Text labelText = textLabel.AddComponent<Text>();
+//         labelText.text = Mathf.RoundToInt(Mathf.Abs(data[i])).ToString(); // Use absolute value for the label text
+//         labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
+//         labelText.alignment = TextAnchor.MiddleCenter;
+//         labelText.color = Color.white;
+
+//         // Set the sibling index of the text label higher than the bar to ensure it renders above the bar
+//         textLabel.transform.SetSiblingIndex(barInstance.transform.GetSiblingIndex() + 1);
+
+//         // LeanTween to smoothly increase the height of the bars
+//         LeanTween.value(barInstance.gameObject, 0f, Mathf.Abs(data[i]), 1f)
+//             .setEase(LeanTweenType.easeOutQuad)
+//             .setOnUpdate((float value) =>
+//             {
+//                 barInstance.sizeDelta = new Vector2(barWidth, value);
+//             });
+//     }
+// }
+
+
 void CreateBars()
 {
     // Clear existing bars
@@ -157,6 +240,12 @@ void CreateBars()
         float labelYOffset = 20f; // Offset for the label above the bar
         float labelYPos = yPos + (Mathf.Sign(data[i]) * Mathf.Abs(data[i]) / 2f) + labelYOffset;
 
+        // Adjust label position for red bars
+        if (data[i] < 0)
+        {
+            labelYPos += 20f; // Move label up for red bars
+        }
+
         textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, labelYPos);
 
         Text labelText = textLabel.AddComponent<Text>();
@@ -177,8 +266,6 @@ void CreateBars()
             });
     }
 }
-
-
 
 
 
@@ -228,6 +315,35 @@ public void ShowSubtitle()
     if (chartSubtitle != null)
     {
         chartSubtitle.gameObject.SetActive(true);
+    }
+}
+public void AddLabelsUnderBars(string[] labels)
+{
+    if (barPrefab == null || chartContainer == null)
+    {
+        Debug.LogError("Assign barPrefab and chartContainer");
+        return;
+    }
+
+    float totalWidth = (barWidth + spacing) * (labels.Length + 2) - spacing;
+    float startX = -totalWidth / 2f;
+
+    for (int i = 0; i < labels.Length; i++)
+    {
+        float xPos = startX + i * (barWidth + spacing);
+        float yPos = -axisLengthY / 2f ; // Offset for labels under the bars
+
+        // Create a new text object for the label
+        GameObject textLabel = new GameObject("BarLabel", typeof(RectTransform));
+        textLabel.transform.SetParent(chartContainer);
+        textLabel.transform.localScale = Vector3.one;
+        textLabel.transform.localPosition = new Vector2(xPos + barWidth / 2f - 13f, yPos);
+
+        Text labelText = textLabel.AddComponent<Text>();
+        labelText.text = labels[i];
+        labelText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
+        labelText.alignment = TextAnchor.MiddleCenter;
+        labelText.color = Color.black;
     }
 }
 

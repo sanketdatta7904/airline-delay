@@ -17,37 +17,35 @@ public class clickEvent : MonoBehaviour
     public GameObject SearchPanel;
 
 
-    void OnMouseDown()
+void OnMouseDown()
+{
+    BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
+
+    Debug.Log("Mouse down at: " + Input.mousePosition);
+    Vector3 mousePos = Input.mousePosition;
+    Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+
+    // we dont want to allow the user to click on the search panel
+    var widthSearchPanel = SearchPanel.GetComponent<RectTransform>().rect.width;
+    var scaleSearchPanel = SearchPanel.transform.localScale.x;
+
+    if (mousePos.x < widthSearchPanel * scaleSearchPanel)
     {
-        BarChartScript barChart = FindObjectOfType<BarChartScript>();  // Declare barChart outside the if statement
+        Debug.Log("Clicked on the search panel");
+        // Hide tooltip
+        TooltipManager._instance.HideTooltip();
 
+        // Hide subtitle
+        barChart.HideSubtitle();
 
-        Debug.Log("Mouse down at: " + Input.mousePosition);
-        Vector3 mousePos = Input.mousePosition;
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        // Update chart data for the top 5 delays
+        UpdateTop5Delays(barChart);
 
-        // we dont want to allow the user to click on the search panel
-        var widthSearchPanel = SearchPanel.GetComponent<RectTransform>().rect.width;
-        var scaleSearchPanel = SearchPanel.transform.localScale.x;
+        // Update chart title to "Top-5 Delay-Prone Airports"
+        UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
+        return;
 
-        if(mousePos.x < widthSearchPanel * scaleSearchPanel)
-         {
-            Debug.Log("Clicked on the search panel");
-            // Hide tooltip
-            TooltipManager._instance.HideTooltip();
-
-            // Hide subtitle
-            barChart.HideSubtitle();
-
-            // Update chart data for the top 5 delays
-            UpdateTop5Delays(barChart);
-
-            // Update chart title to "Top-5 Delay-Prone Airports"
-            UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
-                return;
-
-        }
-    
+    }
 
     PointScript nearestObj = MarkSpawner.getClosestPoint(worldPos);
 
@@ -56,7 +54,7 @@ public class clickEvent : MonoBehaviour
     string message = "Airport Name: " + nearestObj.airportName + "\n" +
                      "Airport Code: " + nearestObj.airportCode + "\n" +
                      "Average Delay: " + nearestObj.avgDelay + "\n" +
-                //     "Distance: " + distance + "\n" +
+                     //     "Distance: " + distance + "\n" +
                      "Type: " + nearestObj.airportType;
 
     Debug.Log(distance);
@@ -72,6 +70,7 @@ public class clickEvent : MonoBehaviour
 
         // Show subtitle
         barChart.ShowSubtitle();
+        barChart.AddLabelsUnderBars(new string[]{"2017", "2018", "2019", "2020", "2021"});
     }
     else
     {
@@ -86,9 +85,11 @@ public class clickEvent : MonoBehaviour
 
         // Update chart title to "Top-5 Delay-Prone Airports"
         UpdateChartTitle("Top-5 Delay-Prone Airports", barChart);
+
+        // Add labels under bars
+        barChart.AddLabelsUnderBars(new string[]{"EBCV", "KBPT", "KLSF", "KTIK", "LFDM"});
     }
 }
-
 
     void UpdateChart(PointScript nearestObj, BarChartScript barChart)
     {
