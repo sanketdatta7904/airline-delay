@@ -65,6 +65,8 @@ public class MarkSpawner2 : MonoBehaviour
 
     // kd tree
     private static KdTree<PointScript> allPointsKd = new KdTree<PointScript>();
+    private string dbPath = "URI=file:" + Application.dataPath + "/../../aviation.db"; // Powerwall
+
 
     // private List<LineRenderer> lineRenderers = new List<LineRenderer>();
     public class LineRendererEndpoints
